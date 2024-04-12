@@ -30,6 +30,8 @@ if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
+use Glpi\Application\View\TemplateRenderer;
+
 class PluginMycustomviewMyview extends CommonDBTM
 {
 
@@ -42,31 +44,24 @@ class PluginMycustomviewMyview extends CommonDBTM
       }
       if ($item->getType() == 'Central') {
 
-         $group   = new PluginMycustomviewPreference();;
-         $result  = $group->find();
-         $groups = [];
-         foreach ($result as $data) {
-            $group_id = $data['groups_id'];
-            echo $group_id;
-            
-
-            //array_push($tabs, __("TEST 3", "mycustomview"));
-         }
-
-
-        /* if(!empty($result->comment)){
-            return __("$result->comment", "mycustomview");
-         }elseif(!empty($result->name)){
-            return __("$result->name", "mycustomview");
-         }else{
-            return 0;
-         }*/
-
-
-         $tabs = [
-            1 => __("TEST", "mycustomview"),
-            2 => __("TEST 2", "mycustomview"),
-        ];
+        $group   = new PluginMycustomviewPreference();;
+        $result  = $group->find();
+        $tabs = [];
+  
+        $i = 0;
+        foreach ($result as $data) {
+           $groups_id = $data['groups_id'];
+           $group_id = json_decode($groups_id);
+           foreach ($group_id as $data) {
+              $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
+              if(!empty($result->comment)){
+                  array_push($tabs, __($result->comment, "mycustomview"));
+               }elseif(!empty($result->name)){
+                  array_push($tabs, __($result->name, "mycustomview"));
+               }
+              $i++;
+           }
+        }
 
         return $tabs;
       }
@@ -93,121 +88,170 @@ class PluginMycustomviewMyview extends CommonDBTM
 
    public static function showMyViewGroup()
    {
-      global $PLUGIN_HOOKS, $DB;
+      global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
+    
+      $WHERE = [
+        'is_deleted' => 0
+    ];
+    $search_users_id = [
+        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
+        'glpi_tickets_users.type'     => CommonITILActor::REQUESTER
+    ];
+    $search_assign = [
+        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
+        'glpi_tickets_users.type'     => CommonITILActor::ASSIGN
+    ];
+    $search_observer = [
+        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
+        'glpi_tickets_users.type'     => CommonITILActor::OBSERVER
+    ];
+      $criteria = [
+        'SELECT'          => ['glpi_tickets.id', 'glpi_tickets.date_mod'],
+        'DISTINCT'        => true,
+        'FROM'            => 'glpi_tickets',
+        'LEFT JOIN'       => [
+            'glpi_tickets_users'    => [
+                'ON' => [
+                    'glpi_tickets_users' => 'tickets_id',
+                    'glpi_tickets'       => 'id'
+                ]
+            ],
+            'glpi_groups_tickets'   => [
+                'ON' => [
+                    'glpi_groups_tickets'   => 'tickets_id',
+                    'glpi_tickets'          => 'id'
+                ]
+            ]
+        ],
+        'WHERE'           => $WHERE + getEntitiesRestrictCriteria('glpi_tickets'),
+        'ORDERBY'         => 'glpi_tickets.date_mod DESC'
+    ];
 
-      $group   = new PluginMycustomviewPreference();;
-      $result  = $group->find();
-      $tabs = [];
 
-      $i = 0;
-      foreach ($result as $data) {
-         $groups_id = $data['groups_id'];
-         $group_id = json_decode($groups_id);
-         foreach ($group_id as $data) {
-            $result = $DB->query("SELECT * FROM glpi_plugin_rpauto_surveys WHERE id = $data")->fetch_object();
-            if(!empty($result->comment)){
-                return __("$result->comment", "mycustomview");
+    $iterator = $DB->request($criteria);
+    $total_row_count = count($iterator);
+    $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-                array_push($tabs, __("TEST".$i, "mycustomview"));
-             }elseif(!empty($result->name)){
-                return __("$result->name", "mycustomview");
+      $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
+      Toolbox::append_params("test", '&amp;') . "\">" .
+      Html::makeTitle(__('Your tickets in progress'), $displayed_row_count, $total_row_count) . "</a>";
 
-                array_push($tabs, __("TEST".$i, "mycustomview"));
-             }
-            $i++;
-         }
-      }
+      $twig_params = [
+        'class'        => 'table table-borderless table-striped table-hover card-table',
+        'header_rows'  => [
+            [
+                [
+                    'colspan'   => 4,
+                    'content'   => $main_header
+                ]
+            ]
+        ],
+        'rows'         => []
+    ];
+    $twig_params['header_rows'][] = [
+        [
+            'content'   => __('ID'),
+            'style'     => 'width: 75px'
+        ],
+        [
+            'content'   => _n('Requester', 'Requesters', 1),
+            'style'     => 'width: 20%'
+        ],
+        [
+            'content'   => _n('Associated element', 'Associated elements', Session::getPluralNumber()),
+            'style'     => 'width: 20%'
+        ],
+        __('Description')
+    ];
+    $i = 0;
+    foreach ($iterator as $data) {
+        $showprivate = false;
+        if (Session::haveRight('followup', ITILFollowup::SEEPRIVATE)) {
+            $showprivate = true;
+        }
 
-      print_r($tabs);
-         
+        $job = new self();
+        $rand = mt_rand();
+        $row = [
+            'values' => []
+        ];
+
+            $row['values'][] = [
+                'content' => "<div class='priority_block' style='border-color: black'><span style='background: white'></span>&nbsp;test</div>"
+            ];
+
+            $requesters = [];
+            if (
+                isset($job->users[CommonITILActor::REQUESTER])
+                && count($job->users[CommonITILActor::REQUESTER])
+            ) {
+                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
+                    if ($d["users_id"] > 0) {
+                        $userdata = getUserName($d["users_id"], 2);
+                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
+                            $userdata['name'];
+                        $requesters[] = $name;
+                    } else {
+                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
+                            $d['alternative_email'];
+                    }
+                }
+            }
+
+            if (
+                isset($job->groups[CommonITILActor::REQUESTER])
+                && count($job->groups[CommonITILActor::REQUESTER])
+            ) {
+                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
+                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
+                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
+                }
+            }
+            $row['values'][] = implode('<br>', $requesters);
+
+            $associated_elements = [];
+            if (!empty($job->hardwaredatas)) {
+                foreach ($job->hardwaredatas as $hardwaredatas) {
+                    if ($hardwaredatas->canView()) {
+                        $associated_elements[] = $hardwaredatas->getTypeName() . " - " . "<span class='b'>" . $hardwaredatas->getLink() . "</span>";
+                    } else if ($hardwaredatas) {
+                        $associated_elements[] = $hardwaredatas->getTypeName() . " - " . "<span class='b'>" . $hardwaredatas->getNameID() . "</span>";
+                    }
+                }
+            } else {
+                $associated_elements[] = __('General');
+            }
+            $row['values'][] = implode('<br>', $associated_elements);
+
+            $link = "<a id='ticket" . 4 . $rand . "' href='" . Ticket::getFormURLWithID(4);
+            $link .= "'>";
+            /*$link = sprintf(
+                __('%1$s %2$s'),
+                $link,
+                Html::showToolTip(
+                    RichText::getEnhancedHtml($job->fields['content']),
+                    ['applyto' => 'ticket' . 4 . $rand,
+                        'display' => false
+                    ]
+                )
+            );*/
+            $row['values'][] = $link;
+
+        $twig_params['rows'][] = $row;
+
+        $i++;
+        if ($i == $displayed_row_count) {
+            break;
+        }
+    }
+    $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
+    echo $output;
 
 
-       /*$showticket = Session::haveRightsOr("ticket", [Ticket::READALL, Ticket::READASSIGN]);
 
-       $showproblem = Session::haveRightsOr('problem', [Problem::READALL, Problem::READMY]);
 
-       $showchange = Session::haveRightsOr('change', [Change::READALL, Change::READMY]);
 
-       $lists = [];
 
-       if ($showticket) {
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'process'
-           ];
-           $lists[] = [
-               'itemtype'  => TicketTask::class,
-               'status'    => 'todo'
-           ];
-       }
-       if (Session::haveRight('ticket', Ticket::READGROUP)) {
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'waiting'
-           ];
-       }
-       if ($showproblem) {
-           $lists[] = [
-               'itemtype'  => Problem::class,
-               'status'    => 'process'
-           ];
-           $lists[] = [
-               'itemtype'  => ProblemTask::class,
-               'status'    => 'todo'
-           ];
-       }
 
-       if ($showchange) {
-           $lists[] = [
-               'itemtype'  => Change::class,
-               'status'    => 'process'
-           ];
-           $lists[] = [
-               'itemtype'  => ChangeTask::class,
-               'status'    => 'todo'
-           ];
-       }
-
-       if (Session::haveRight('ticket', Ticket::READGROUP)) {
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'observed'
-           ];
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'toapprove'
-           ];
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'requestbyself'
-           ];
-       } else {
-           $lists[] = [
-               'itemtype'  => Ticket::class,
-               'status'    => 'waiting'
-           ];
-       }
-
-       $twig_params = [
-           'cards' => [],
-       ];
-       foreach ($lists as $list) {
-           $card_params = [
-               'start'             => 0,
-               'status'            => $list['status'],
-               'showgrouptickets'  => 'true'
-           ];
-           $idor = Session::getNewIDORToken($list['itemtype'], $card_params);
-           $twig_params['cards'][] = [
-               'itemtype'  => $list['itemtype'],
-               'widget'    => 'central_list',
-               'params'    => $card_params + [
-                   '_idor_token'  => $idor
-               ]
-           ];
-       }
-       TemplateRenderer::getInstance()->display('central/widget_tab.html.twig', $twig_params);*/
    }
-
-   
 }
