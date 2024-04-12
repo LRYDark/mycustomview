@@ -53,12 +53,6 @@ class PluginMycustomviewPreference extends CommonDBTM {
 
       $self                  = new self();
       $input["users_id"]     = $users_id;
-      $input["groupe_id_1"] = 0;
-      $input["groupe_id_2"] = 0;
-      $input["groupe_id_3"] = 0;
-      $input["groupe_id_4"] = 0;
-      $input["groupe_id_5"] = 0;
-
       return $self->add($input);
    }
 
@@ -94,27 +88,27 @@ class PluginMycustomviewPreference extends CommonDBTM {
       echo "<div align='center'>";
 
       echo "<table class='tab_cadre_fixe' style='margin: 0; margin-top: 5px;'>\n";
-      echo " <tr><th colspan='2'>" .__("Affichage des groupes dans \"Ma vue groupe(s)\"", "mycustomview") . ".</th></tr>\n";
+      echo " <tr><th colspan='2'>" .__("Affichage des groupes sur la page central", "mycustomview") . ".</th></tr>\n";
 
-      for ($i = 1; $i <= 5; $i++) {
-          echo "<tr class='tab_bg_1'>";
-          echo "<td>" . __('Affichage des groupes -> N°'.$i) . "</td>";
-          echo "<td>";
-          //notificationtemplates_id
-          Dropdown::show('Group', [
-              'name' => 'groupe_id_'.$i,
-              'value' => $self->fields["groupe_id_".$i],
-              'display_emptychoice' => 1,
-              'specific_tags' => [],
-              'itemtype' => 'Group',
-              'displaywith' => [],
-              'emptylabel' => "-----",
-              'used' => [],
-              'toadd' => [],
-              'entity_restrict' => 0,
-          ]); 
-          echo "</td><td colspan='2'></td></tr>";
+      echo "<tr class='tab_bg_1 center'><td>" . __('Affichage des groupe(s)', 'mycustomview') . "</td>";
+      echo "<td>";
+      $group   = new Group();;
+      $result  = $group->find();
+
+      $groups = [];
+      foreach ($result as $data) {
+         $groups[$data['id']] = $data['name'];
       }
+      if ($self->fields['groups_id'] == NULL) {
+         Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
+                                                            'width'    => 200,
+                                                            'value'    => $self->fields["groups_id"]]);
+      } else {
+         Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
+                                                            'width'    => 200,
+                                                            'values'   => json_decode($self->fields["groups_id"], true)]);
+      }
+      echo "</td></tr>";
 
       echo "<tr class='tab_bg_1 center'><td colspan='2'>";
       echo Html::submit(_sx('button', 'Post'), ['name' => 'update_user_preferences_mycustomview', 'class' => 'btn btn-primary']);
@@ -125,5 +119,14 @@ class PluginMycustomviewPreference extends CommonDBTM {
       echo "</div>";
       Html::closeForm();
 
+   }
+
+   function prepareInputForUpdate($input) {
+      if (isset($input['groups_id'])) {
+         $input['groups_id'] = json_encode($input['groups_id']);
+      } else {
+         $input['groups_id'] = 'NULL';
+      }
+      return $input;
    }
 }

@@ -48,9 +48,9 @@ function plugin_init_mycustomview()
    Plugin::registerClass('PluginMycustomviewProfile', ['addtabon' => 'Profile']);
 
    Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
-   for ($i = 1; $i <= 5; $i++) {
+   /*for ($i = 1; $i <= 5; $i++) {
       Plugin::registerClass('PluginMycustomviewMyview'.$i, ['addtabon' => 'Central']);
-   }
+   }*/
 
    Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
 

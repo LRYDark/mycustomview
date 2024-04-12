@@ -50,11 +50,7 @@ function plugin_mycustomview_install()
       $query = "CREATE TABLE `glpi_plugin_mycustomview_preferences` (
          `id` int unsigned NOT NULL auto_increment,
          `users_id` int unsigned NOT NULL default '0',
-         `groupe_id_1` int NULL default '0',
-         `groupe_id_2` int NULL default '0',
-         `groupe_id_3` int NULL default '0',
-         `groupe_id_4` int NULL default '0',
-         `groupe_id_5` int NULL default '0',
+         `groups_id` text NULL,
          PRIMARY KEY  (`id`),
          KEY `users_id` (`users_id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";
