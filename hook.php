@@ -1,0 +1,114 @@
+<?php
+/*
+ -------------------------------------------------------------------------
+ MyCustomView plugin for GLPI
+ Copyright (C) 2023 by the MyCustomView Development Team.
+
+ https://github.com/pluginsGLPI/mycustomview
+ -------------------------------------------------------------------------
+
+ LICENSE
+
+ This file is part of MyCustomView.
+
+ MyCustomView is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ MyCustomView is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with MyCustomView. If not, see <http://www.gnu.org/licenses/>.
+ --------------------------------------------------------------------------
+ */
+
+/**
+ * Plugin install process
+ *
+ * @return boolean
+ */
+function plugin_mycustomview_install()
+{
+
+   global $DB;
+
+   // ------- On include les classes importantes
+   include_once(GLPI_ROOT . "/plugins/mycustomview/inc/profile.class.php");
+   //include_once(GLPI_ROOT . "/plugins/mycustomview/inc/config.class.php");
+
+   PluginMycustomviewProfile::createFirstAccess($_SESSION["glpiactiveprofile"]["id"]);
+
+   // première installation -> Création de la table dans la base
+
+   // requete de création des tables
+
+   if (!$DB->TableExists("glpi_plugin_mycustomview_preferences")) {
+      $query = "CREATE TABLE `glpi_plugin_mycustomview_preferences` (
+         `id` int unsigned NOT NULL auto_increment,
+         `users_id` int unsigned NOT NULL default '0',
+         `groupe_id_1` int NULL default '0',
+         `groupe_id_2` int NULL default '0',
+         `groupe_id_3` int NULL default '0',
+         `groupe_id_4` int NULL default '0',
+         `groupe_id_5` int NULL default '0',
+         PRIMARY KEY  (`id`),
+         KEY `users_id` (`users_id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";
+
+      $DB->query($query) or die("error creating glpi_plugin_mycustomview_preferences " . $DB->error());
+   }
+
+   return true;
+}
+
+/**
+ * Plugin uninstall process
+ *
+ * @return boolean
+ */
+function plugin_mycustomview_uninstall()
+{
+   global $DB;
+
+   $tables = array("glpi_plugin_mycustomview_preferences");
+
+   foreach ($tables as $table) {
+      $DB->query("DROP TABLE IF EXISTS `$table`;");
+   }
+
+   global $DB;
+
+    $result = $DB->request([
+        'SELECT' => ['profiles_id'],
+        'FROM' => 'glpi_profilerights',
+        'WHERE' => ['name' => ['LIKE', 'plugin_mycustomview%']]
+    ]);
+
+    foreach ($result as $id_profil) {
+        $DB->delete(
+            'glpi_profilerights', [
+                'name' => ['LIKE', 'plugin_mycustomview%'],
+                'profiles_id' => $id_profil
+            ]
+        );
+    }
+
+   return true;
+}
+
+function changePageOnHome()
+{
+   // vérification plugin activé + vérification du profil (si profil demandeur -> return)
+   $plugin = new Plugin();
+   if ($plugin->isActivated("mycustomview")) {
+      if (isset($_SESSION['glpiactiveprofile']['id'])) {
+         if ($_SESSION['glpiactiveprofile']['id'] == 1) {
+            return;
+         }
+      }
+   }
+}
