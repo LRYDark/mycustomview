@@ -95,7 +95,7 @@ class PluginMycustomviewMyview extends CommonDBTM
       global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
     
     //***************************************************REQUETE */
-      $WHERE = [
+      /*$WHERE = [
         'is_deleted' => 0
       ];
       $criteria = [
@@ -118,7 +118,13 @@ class PluginMycustomviewMyview extends CommonDBTM
         ],
         'WHERE'           => $WHERE + getEntitiesRestrictCriteria('glpi_tickets'),
         'ORDERBY'         => 'glpi_tickets.date_mod DESC'
-    ];
+    ];*/
+    $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id  FROM glpi_tickets 
+                LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
+                    WHERE glpi_groups_tickets.groups_id = 5 
+                        AND glpi_tickets.status IN ('2', '3')
+                        AND glpi_tickets.is_deleted = 0
+                        ORDER BY glpi_tickets.date_mod DESC;";
     //***************************************************REQUETE */
 
     // Variables (requete)
@@ -153,7 +159,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             'style'     => 'width: 20%'
         ],
         [
-            'content'   => _n('Associated element', 'Associated elements', Session::getPluralNumber()),
+            'content'   => _n('Entity', 'Entity', 1),
             'style'     => 'width: 20%'
         ],
         __('Description')
@@ -172,8 +178,9 @@ class PluginMycustomviewMyview extends CommonDBTM
             'values' => []
         ];
             /************************************************************ID */
+            $ID = $data['id'];
             $row['values'][] = [
-                'content' => "<div class='priority_block' style='border-color: black'><span style='background: white'></span>&nbsp;test</div>"
+                'content' => "<div class='priority_block' style='border-color: black'><span style='background: white'></span>&nbsp;$ID</div>"
             ];
             /************************************************************ID */
 
@@ -210,33 +217,36 @@ class PluginMycustomviewMyview extends CommonDBTM
 
             /************************************************************elements associés */
             $associated_elements = [];
-            if (!empty($job->hardwaredatas)) {
-                foreach ($job->hardwaredatas as $hardwaredatas) {
-                    if ($hardwaredatas->canView()) {
-                        $associated_elements[] = $hardwaredatas->getTypeName() . " - " . "<span class='b'>" . $hardwaredatas->getLink() . "</span>";
-                    } else if ($hardwaredatas) {
-                        $associated_elements[] = $hardwaredatas->getTypeName() . " - " . "<span class='b'>" . $hardwaredatas->getNameID() . "</span>";
-                    }
-                }
-            } else {
-                $associated_elements[] = __('test');
+            $entity_id = $data['entities_id'];
+
+            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+            if(!empty($result->completename)){
+                $associated_elements[] = __($result->completename);
+            }else{
+                $associated_elements[] = __($result->name);
             }
+
             $row['values'][] = implode('<br>', $associated_elements);
             /************************************************************elements associés */
 
             /************************************************************descritpion */
-            $link = "<a id='ticket" . 4 . $rand . "' href='" . Ticket::getFormURLWithID(4);
+            $ticket_id = $data['id'];
+            $ticket_name = $data['name'];
+            $ticket_content = $data['content'];
+            
+            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
             $link .= "'>";
             $link = sprintf(
                 __('%1$s %2$s'),
                 $link,
                 Html::showToolTip(
-                    Glpi\RichText\RichText::getEnhancedHtml('t-est'),
-                    ['applyto' => 'ticket' . 4 . $rand,
+                    Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
+                    ['applyto' => 'ticket' . $ticket_id,
                         'display' => false
                     ]
                 )
             );
+            $link .= $ticket_name;
             $row['values'][] = $link;
             /************************************************************descritpion */
 
