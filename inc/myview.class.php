@@ -97,30 +97,6 @@ class PluginMycustomviewMyview extends CommonDBTM
       global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
     
     //***************************************************REQUETE */
-      /*$WHERE = [
-        'is_deleted' => 0
-      ];
-      $criteria = [
-        'SELECT'          => ['glpi_tickets.id', 'glpi_tickets.date_mod'],
-        'DISTINCT'        => true,
-        'FROM'            => 'glpi_tickets',
-        'LEFT JOIN'       => [
-            'glpi_tickets_users'    => [
-                'ON' => [
-                    'glpi_tickets_users' => 'tickets_id',
-                    'glpi_tickets'       => 'id'
-                ]
-            ],
-            'glpi_groups_tickets'   => [
-                'ON' => [
-                    'glpi_groups_tickets'   => 'tickets_id',
-                    'glpi_tickets'          => 'id'
-                ]
-            ]
-        ],
-        'WHERE'           => $WHERE + getEntitiesRestrictCriteria('glpi_tickets'),
-        'ORDERBY'         => 'glpi_tickets.date_mod DESC'
-    ];*/
     $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                     WHERE glpi_groups_tickets.groups_id = $i 
@@ -136,19 +112,36 @@ class PluginMycustomviewMyview extends CommonDBTM
 
     //***************************************************TABLEAU */
 
-    /*$options['criteria'][0]['field']      = 12; // status
-    $options['criteria'][0]['searchtype'] = 'equals';
-    $options['criteria'][0]['value']      = self::SOLVED;
-    $options['criteria'][0]['link']       = 'AND';
+    $options['criteria'] = [
+        [
+            'field'        => 8,
+            'searchtype'   => 'equals',
+            'value'        => $i,
+            'link'         => 'AND',
+        ],
+        [
+            'link' => 'AND',
+            'criteria' => [
+                [
+                    'link'        => 'AND',
+                    'field'       => 12,
+                    'searchtype'  => 'equals',
+                    'value'       => Ticket::INCOMING,
+                ],
+                [
+                    'link'        => 'OR',
+                    'field'       => 12,
+                    'searchtype'  => 'equals',
+                    'value'       => 'process',
+                ]
+            ]
+        ]
+    ];
 
-    $options['criteria'][1]['field']      = 71; // groups_id
-    $options['criteria'][1]['searchtype'] = 'equals';
-    $options['criteria'][1]['value']      = 'mygroups';
-    $options['criteria'][1]['link']       = 'AND';*/
       $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
-      //Toolbox::append_params($options, '&amp;') . "\">" .
-      Toolbox::append_params("test", '&amp;') . "\">" .
-      Html::makeTitle(__('Your tickets in progress'), $displayed_row_count, $total_row_count) . "</a>";
+      Toolbox::append_params($options, '&amp;') . "\">" .
+      //Toolbox::append_params("test", '&amp;') . "\">" .
+      Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
 
       $twig_params = [
         'class'        => 'table table-borderless table-striped table-hover card-table',
