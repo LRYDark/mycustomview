@@ -86,25 +86,18 @@ class PluginMycustomviewMyview extends CommonDBTM
      return true;
    }
 
+
+
+
+
    public static function showMyViewGroup()
    {
       global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
     
+    //***************************************************REQUETE */
       $WHERE = [
         'is_deleted' => 0
-    ];
-    $search_users_id = [
-        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
-        'glpi_tickets_users.type'     => CommonITILActor::REQUESTER
-    ];
-    $search_assign = [
-        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
-        'glpi_tickets_users.type'     => CommonITILActor::ASSIGN
-    ];
-    $search_observer = [
-        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
-        'glpi_tickets_users.type'     => CommonITILActor::OBSERVER
-    ];
+      ];
       $criteria = [
         'SELECT'          => ['glpi_tickets.id', 'glpi_tickets.date_mod'],
         'DISTINCT'        => true,
@@ -126,12 +119,14 @@ class PluginMycustomviewMyview extends CommonDBTM
         'WHERE'           => $WHERE + getEntitiesRestrictCriteria('glpi_tickets'),
         'ORDERBY'         => 'glpi_tickets.date_mod DESC'
     ];
+    //***************************************************REQUETE */
 
-
+    // Variables (requete)
     $iterator = $DB->request($criteria);
     $total_row_count = count($iterator);
     $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
+    //***************************************************TABLEAU */
       $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
       Toolbox::append_params("test", '&amp;') . "\">" .
       Html::makeTitle(__('Your tickets in progress'), $displayed_row_count, $total_row_count) . "</a>";
@@ -143,7 +138,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 [
                     'colspan'   => 4,
                     'content'   => $main_header
-                ]
+                ],
             ]
         ],
         'rows'         => []
@@ -163,6 +158,7 @@ class PluginMycustomviewMyview extends CommonDBTM
         ],
         __('Description')
     ];
+    //***************************************************TABLEAU */
     $i = 0;
     foreach ($iterator as $data) {
         $showprivate = false;
@@ -175,11 +171,13 @@ class PluginMycustomviewMyview extends CommonDBTM
         $row = [
             'values' => []
         ];
-
+            /************************************************************ID */
             $row['values'][] = [
                 'content' => "<div class='priority_block' style='border-color: black'><span style='background: white'></span>&nbsp;test</div>"
             ];
+            /************************************************************ID */
 
+            /************************************************************demandeur */
             $requesters = [];
             if (
                 isset($job->users[CommonITILActor::REQUESTER])
@@ -208,7 +206,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                 }
             }
             $row['values'][] = implode('<br>', $requesters);
+            /************************************************************demandeur */
 
+            /************************************************************elements associés */
             $associated_elements = [];
             if (!empty($job->hardwaredatas)) {
                 foreach ($job->hardwaredatas as $hardwaredatas) {
@@ -219,23 +219,26 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                 }
             } else {
-                $associated_elements[] = __('General');
+                $associated_elements[] = __('test');
             }
             $row['values'][] = implode('<br>', $associated_elements);
+            /************************************************************elements associés */
 
+            /************************************************************descritpion */
             $link = "<a id='ticket" . 4 . $rand . "' href='" . Ticket::getFormURLWithID(4);
             $link .= "'>";
-            /*$link = sprintf(
+            $link = sprintf(
                 __('%1$s %2$s'),
                 $link,
                 Html::showToolTip(
-                    RichText::getEnhancedHtml($job->fields['content']),
+                    Glpi\RichText\RichText::getEnhancedHtml('t-est'),
                     ['applyto' => 'ticket' . 4 . $rand,
                         'display' => false
                     ]
                 )
-            );*/
+            );
             $row['values'][] = $link;
+            /************************************************************descritpion */
 
         $twig_params['rows'][] = $row;
 
