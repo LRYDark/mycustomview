@@ -265,11 +265,5 @@ class PluginMycustomviewMyview extends CommonDBTM
     $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
     echo $output;
 
-
-
-
-
-
-
    }
 }
