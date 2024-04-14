@@ -100,16 +100,15 @@ class PluginMycustomviewMyview extends CommonDBTM
     public static function showMyViewGroup($id_group){
         global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
 
+        $tableau_nbr = 0;
+        $taille_space = 0;
+        $tableau_space = [];
+
         $user_id = session::getLoginUserID();
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 183px;">';
             // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
-
-            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;">';
-            echo '<div class="card">';
-            echo '<div class="card-body p-0">';
-
                 //***************************************************REQUETE */
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -126,6 +125,22 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
                 if ($displayed_row_count > 0) {
+                    array_push( $tableau_space, $total_row_count);
+
+                    if($tableau_nbr > 1){
+                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                    }
+
+                    if ($tableau_nbr % 2 == 0) {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                    } else {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                    }
+                    $tableau_nbr ++;
+
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
+        
                     $options['criteria'] = [
                         [
                             'field'        => 8,
@@ -278,17 +293,15 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
                     echo $output;
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
                 }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
             // _____________________________ TABLEAU 1 _____________________________
 
             //******************************************************************* */
             // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS 'requestbyself'
-            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;">';
-            echo '<div class="card">';
-            echo '<div class="card-body p-0">';
                 //***************************************************REQUETE */
                 $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -304,6 +317,22 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
                 if ($displayed_row_count2 > 0) {
+                    array_push($tableau_space, $total_row_count2);
+                    
+                    if($tableau_nbr > 1){
+                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                    }
+                    
+                    if ($tableau_nbr % 2 == 0) {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                    } else {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                    }
+                    $tableau_nbr ++;
+
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
+
                     $options2['criteria'][0]['field']      = 12; // status
                     $options2['criteria'][0]['searchtype'] = 'equals';
                     $options2['criteria'][0]['value']      = 'notold';
@@ -440,17 +469,15 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
                     echo $output;
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
                 }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
             // _____________________________ TABLEAU 2 _____________________________
 
             //******************************************************************* */
             // _____________________________ TABLEAU 3 _____________________________ TICKET EN ATTENTE 'waiting'
-            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 300px;">';
-            echo '<div class="card">';
-            echo '<div class="card-body p-0">';
                 //***************************************************REQUETE */
                 $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -467,6 +494,22 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
 
                 if ($displayed_row_count3 > 0) {
+                    array_push( $tableau_space, $total_row_count3);
+
+                    if($tableau_nbr > 1){
+                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                    }
+                    
+                    if ($tableau_nbr % 2 == 0) {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                    } else {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                    }
+                    $tableau_nbr ++;
+
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
+
                     $options3['criteria'][0]['field']      = 12; // status
                     $options3['criteria'][0]['searchtype'] = 'equals';
                     $options3['criteria'][0]['value']      = Ticket::WAITING;
@@ -603,17 +646,15 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
                     echo $output;
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
                 }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
             // _____________________________ TABLEAU 3 _____________________________
                         
             //******************************************************************* */
             // _____________________________ TABLEAU 10 _____________________________ VOS TACHES DE TICKET A TRAITER 
-            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 300px;">';
-            echo '<div class="card">';
-            echo '<div class="card-body p-0">';
                 //***************************************************REQUETE
                 $criteria10 ="	SELECT *, glpi_tickettasks.content AS task_content FROM glpi_tickets 
                                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -632,6 +673,22 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
                 if ($displayed_row_count10 > 0) {
+                    array_push($tableau_space, $total_row_count10);
+
+                    if($tableau_nbr > 1){
+                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                    }
+
+                    if ($tableau_nbr % 2 == 0) {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                    } else {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                    }
+                    $tableau_nbr ++;
+
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
+
                     $options10 = [
                         'reset'    => 'reset',
                         'criteria' => [
@@ -759,10 +816,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
                     echo $output;
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
                 }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
             // _____________________________ TABLEAU 10 _____________________________
         echo '</div>';
     }
