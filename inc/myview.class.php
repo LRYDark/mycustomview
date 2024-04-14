@@ -107,7 +107,7 @@ class PluginMycustomviewMyview extends CommonDBTM
         $user_id = session::getLoginUserID();
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
-        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: auto;">';
+        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 5000px;">';
         
             // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
