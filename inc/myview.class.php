@@ -107,7 +107,8 @@ class PluginMycustomviewMyview extends CommonDBTM
         $user_id = session::getLoginUserID();
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
-        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 183px;">';
+        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: auto;">';
+        
             // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
@@ -128,7 +129,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     array_push( $tableau_space, $total_row_count);
 
                     if($tableau_nbr > 1){
-                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
                     }
 
                     if ($tableau_nbr % 2 == 0) {
@@ -187,15 +188,15 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $twig_params['header_rows'][] = [
                         [
                             'content'   => __('ID'),
-                            'style'     => 'width: 75px'
+                            'style'     => 'width: 75px',
                         ],
                         [
                             'content'   => _n('Requester', 'Requesters', 1),
-                            'style'     => 'width: 20%'
+                            'style'     => 'width: 20%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
-                            'style'     => 'width: 20%'
+                            'style'     => 'width: 20%',
                         ],
                         __('Description')
                     ];
@@ -214,7 +215,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
                             $ID = $data['id'];
                             $row['values'][] = [
-                                'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
+                                'content' => "<div class='priority_block' style='border-color: $bgcolor; padding-bottom: -10px;'><span style='background: $bgcolor'></span>&nbsp;$ID</div>",
                             ];
                             //************************************************************ID 
 
@@ -255,9 +256,9 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                             $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
                             }
 
                             $row['values'][] = implode('<br>', $associated_elements);
@@ -320,7 +321,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     array_push($tableau_space, $total_row_count2);
                     
                     if($tableau_nbr > 1){
-                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
                     }
                     
                     if ($tableau_nbr % 2 == 0) {
@@ -431,9 +432,9 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                             $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
                             }
 
                             $row['values'][] = implode('<br>', $associated_elements);
@@ -497,7 +498,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     array_push( $tableau_space, $total_row_count3);
 
                     if($tableau_nbr > 1){
-                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
                     }
                     
                     if ($tableau_nbr % 2 == 0) {
@@ -608,9 +609,9 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                             $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
                             }
 
                             $row['values'][] = implode('<br>', $associated_elements);
@@ -676,7 +677,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     array_push($tableau_space, $total_row_count10);
 
                     if($tableau_nbr > 1){
-                        $taille_space = 85 + (51*$tableau_space[$tableau_nbr-2]);
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
                     }
 
                     if ($tableau_nbr % 2 == 0) {
@@ -770,9 +771,9 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                             $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
                             }
 
                             $row['values'][] = implode('<br>', $associated_elements);
