@@ -125,50 +125,50 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count = count($iterator);
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-                $options['criteria'] = [
-                    [
-                        'field'        => 8,
-                        'searchtype'   => 'equals',
-                        'value'        => $id_group,
-                        'link'         => 'AND',
-                    ],
-                    [
-                        'link' => 'AND',
-                        'criteria' => [
-                            [
-                                'link'        => 'AND',
-                                'field'       => 12,
-                                'searchtype'  => 'equals',
-                                'value'       => Ticket::INCOMING,
-                            ],
-                            [
-                                'link'        => 'OR',
-                                'field'       => 12,
-                                'searchtype'  => 'equals',
-                                'value'       => 'process',
+                if ($displayed_row_count > 0) {
+                    $options['criteria'] = [
+                        [
+                            'field'        => 8,
+                            'searchtype'   => 'equals',
+                            'value'        => $id_group,
+                            'link'         => 'AND',
+                        ],
+                        [
+                            'link' => 'AND',
+                            'criteria' => [
+                                [
+                                    'link'        => 'AND',
+                                    'field'       => 12,
+                                    'searchtype'  => 'equals',
+                                    'value'       => Ticket::INCOMING,
+                                ],
+                                [
+                                    'link'        => 'OR',
+                                    'field'       => 12,
+                                    'searchtype'  => 'equals',
+                                    'value'       => 'process',
+                                ]
                             ]
                         ]
-                    ]
-                ];
+                    ];
 
-                $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
-                Toolbox::append_params($options, '&amp;') . "\">" .
-                Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
+                    $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                    Toolbox::append_params($options, '&amp;') . "\">" .
+                    Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
 
-                $twig_params = [
-                    'class'        => 'table table-borderless table-striped table-hover card-table',
-                    'header_rows'  => [
-                        [
+                    $twig_params = [
+                        'class'        => 'table table-borderless table-striped table-hover card-table',
+                        'header_rows'  => [
                             [
-                                'colspan'   => 4,
-                                'content'   => $main_header
-                            ],
-                        ]
-                    ],
-                    'rows'         => []
-                ];
+                                [
+                                    'colspan'   => 4,
+                                    'content'   => $main_header
+                                ],
+                            ]
+                        ],
+                        'rows'         => []
+                    ];
 
-                if ($displayed_row_count > 0) {
                     $twig_params['header_rows'][] = [
                         [
                             'content'   => __('ID'),
@@ -303,34 +303,34 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count2 = count($iterator2);
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
-                $options2['criteria'][0]['field']      = 12; // status
-                $options2['criteria'][0]['searchtype'] = 'equals';
-                $options2['criteria'][0]['value']      = 'notold';
-                $options2['criteria'][0]['link']       = 'AND';
-
-                $options2['criteria'][1]['field']      = 71; // groups_id
-                $options2['criteria'][1]['searchtype'] = 'equals';
-                $options2['criteria'][1]['value']      = $id_group;
-                $options2['criteria'][1]['link']       = 'AND';
-
-                $main_header2 = "<a href=\"" . Ticket::getSearchURL() . "?" .
-                Toolbox::append_params($options2, '&amp;') . "\">" .
-                Html::makeTitle(__('Your tickets in progress'), $displayed_row_count2, $total_row_count2) . "</a>";
-
-                $twig_params = [
-                    'class'        => 'table table-borderless table-striped table-hover card-table',
-                    'header_rows'  => [
-                        [
-                            [
-                                'colspan'   => 4,
-                                'content'   => $main_header2
-                            ],
-                        ]
-                    ],
-                    'rows'         => []
-                ];
-
                 if ($displayed_row_count2 > 0) {
+                    $options2['criteria'][0]['field']      = 12; // status
+                    $options2['criteria'][0]['searchtype'] = 'equals';
+                    $options2['criteria'][0]['value']      = 'notold';
+                    $options2['criteria'][0]['link']       = 'AND';
+
+                    $options2['criteria'][1]['field']      = 71; // groups_id
+                    $options2['criteria'][1]['searchtype'] = 'equals';
+                    $options2['criteria'][1]['value']      = $id_group;
+                    $options2['criteria'][1]['link']       = 'AND';
+
+                    $main_header2 = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                    Toolbox::append_params($options2, '&amp;') . "\">" .
+                    Html::makeTitle(__('Your tickets in progress'), $displayed_row_count2, $total_row_count2) . "</a>";
+
+                    $twig_params = [
+                        'class'        => 'table table-borderless table-striped table-hover card-table',
+                        'header_rows'  => [
+                            [
+                                [
+                                    'colspan'   => 4,
+                                    'content'   => $main_header2
+                                ],
+                            ]
+                        ],
+                        'rows'         => []
+                    ];
+
                     $twig_params['header_rows'][] = [
                         [
                             'content'   => __('ID'),
@@ -466,34 +466,34 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count3 = count($iterator3);
                 $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
 
-                $options3['criteria'][0]['field']      = 12; // status
-                $options3['criteria'][0]['searchtype'] = 'equals';
-                $options3['criteria'][0]['value']      = Ticket::WAITING;
-                $options3['criteria'][0]['link']       = 'AND';
-
-                $options3['criteria'][1]['field']      = 8; // groups_id_assign
-                $options3['criteria'][1]['searchtype'] = 'equals';
-                $options3['criteria'][1]['value']      = $id_group;
-                $options3['criteria'][1]['link']       = 'AND';
-
-                $main_header3 = "<a href=\"" . Ticket::getSearchURL() . "?" .
-                Toolbox::append_params($options3, '&amp;') . "\">" .
-                Html::makeTitle(__('Tickets on pending status'), $displayed_row_count3, $total_row_count3) . "</a>";
-
-                $twig_params = [
-                    'class'        => 'table table-borderless table-striped table-hover card-table',
-                    'header_rows'  => [
-                        [
-                            [
-                                'colspan'   => 4,
-                                'content'   => $main_header3
-                            ],
-                        ]
-                    ],
-                    'rows'         => []
-                ];
-
                 if ($displayed_row_count3 > 0) {
+                    $options3['criteria'][0]['field']      = 12; // status
+                    $options3['criteria'][0]['searchtype'] = 'equals';
+                    $options3['criteria'][0]['value']      = Ticket::WAITING;
+                    $options3['criteria'][0]['link']       = 'AND';
+
+                    $options3['criteria'][1]['field']      = 8; // groups_id_assign
+                    $options3['criteria'][1]['searchtype'] = 'equals';
+                    $options3['criteria'][1]['value']      = $id_group;
+                    $options3['criteria'][1]['link']       = 'AND';
+
+                    $main_header3 = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                    Toolbox::append_params($options3, '&amp;') . "\">" .
+                    Html::makeTitle(__('Tickets on pending status'), $displayed_row_count3, $total_row_count3) . "</a>";
+
+                    $twig_params = [
+                        'class'        => 'table table-borderless table-striped table-hover card-table',
+                        'header_rows'  => [
+                            [
+                                [
+                                    'colspan'   => 4,
+                                    'content'   => $main_header3
+                                ],
+                            ]
+                        ],
+                        'rows'         => []
+                    ];
+
                     $twig_params['header_rows'][] = [
                         [
                             'content'   => __('ID'),
@@ -631,48 +631,48 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count10 = count($iterator10);
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
-                $options10 = [
-                    'reset'    => 'reset',
-                    'criteria' => [
-                        [
-                            'field'      => 12, // status
-                            'searchtype' => 'equals',
-                            'value'      => 'notold',
-                            'link'       => 'AND',
-                        ]
-                    ],
-                ];
-                $options10['criteria'][] = [
-                    'field'      => 112, // tech in charge of task
-                    'searchtype' => 'equals',
-                    'value'      => $id_group,
-                    'link'       => 'AND',
-                ];
-                $options10['criteria'][] = [
-                    'field'      => 33, // task status
-                    'searchtype' => 'equals',
-                    'value'      =>  Planning::TODO,
-                    'link'       => 'AND',
-                ];
-
-                $main_header10 = "<a href=\"" . Ticket::getSearchURL() . "?" .
-                Toolbox::append_params($options10, '&amp;') . "\">" .
-                Html::makeTitle(__('Ticket tasks to do'), $displayed_row_count3, $total_row_count10) . "</a>";
-
-                $twig_params = [
-                    'class'        => 'table table-borderless table-striped table-hover card-table',
-                    'header_rows'  => [
-                        [
-                            [
-                                'colspan'   => 4,
-                                'content'   => $main_header10
-                            ],
-                        ]
-                    ],
-                    'rows'         => []
-                ];
-
                 if ($displayed_row_count10 > 0) {
+                    $options10 = [
+                        'reset'    => 'reset',
+                        'criteria' => [
+                            [
+                                'field'      => 12, // status
+                                'searchtype' => 'equals',
+                                'value'      => 'notold',
+                                'link'       => 'AND',
+                            ]
+                        ],
+                    ];
+                    $options10['criteria'][] = [
+                        'field'      => 112, // tech in charge of task
+                        'searchtype' => 'equals',
+                        'value'      => $id_group,
+                        'link'       => 'AND',
+                    ];
+                    $options10['criteria'][] = [
+                        'field'      => 33, // task status
+                        'searchtype' => 'equals',
+                        'value'      =>  Planning::TODO,
+                        'link'       => 'AND',
+                    ];
+
+                    $main_header10 = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                    Toolbox::append_params($options10, '&amp;') . "\">" .
+                    Html::makeTitle(__('Ticket tasks to do'), $displayed_row_count3, $total_row_count10) . "</a>";
+
+                    $twig_params = [
+                        'class'        => 'table table-borderless table-striped table-hover card-table',
+                        'header_rows'  => [
+                            [
+                                [
+                                    'colspan'   => 4,
+                                    'content'   => $main_header10
+                                ],
+                            ]
+                        ],
+                        'rows'         => []
+                    ];
+
                     $twig_params['header_rows'][] = [
                         [
                             'content'   => __('ID'),
