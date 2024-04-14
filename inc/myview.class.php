@@ -73,6 +73,8 @@ class PluginMycustomviewMyview extends CommonDBTM
       global $PLUGIN_HOOKS, $DB;
 
       if ($item->getType() == 'Central') {
+
+        $params = $_REQUEST['params'];
         $group   = new PluginMycustomviewPreference();
         $result  = $group->find();
         $i = 0;
@@ -82,7 +84,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             foreach ($group_id as $data) {
                 switch ($tabnum) {
                     case $i:
-                        self::showMyViewGroup($data);
+                        self::showMyViewGroup($data, $params['status'] ?? 'process');
                         break;
                 }
                 $i++;
@@ -92,19 +94,21 @@ class PluginMycustomviewMyview extends CommonDBTM
      return true;
    }
 
-    public static function showMyViewGroup($id_group){
+    public static function showMyViewGroup($id_group, $status = "process"){
         global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
 
-        g$glpi_config = new config();
-
-        $displayed_row_count_max = 2;
+        $user_id = session::getLoginUserID();
+        $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 183px;">';
-            // _____________________________ TABLEAU 1 _____________________________
+            // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER
 
             echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;">';
             echo '<div class="card">';
             echo '<div class="card-body p-0">';
+
+            switch ($status) {
+                case "process":
                 //***************************************************REQUETE */
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -149,6 +153,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 Toolbox::append_params($options, '&amp;') . "\">" .
                 Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
 
+            }
                 $twig_params = [
                     'class'        => 'table table-borderless table-striped table-hover card-table',
                     'header_rows'  => [
@@ -182,22 +187,22 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator as $data) {
 
-                        if ($i == $displayed_row_count_max) {
+                        if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
 
                         $row = [
                             'values' => []
                         ];
-                            /************************************************************ID */
+                            //************************************************************ID 
                             $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
                             $ID = $data['id'];
                             $row['values'][] = [
                                 'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
                             ];
-                            /************************************************************ID */
+                            //************************************************************ID 
 
-                            /************************************************************demandeur */
+                            //************************************************************demandeur 
                             $requesters = [];
                             if (
                                 isset($job->users[CommonITILActor::REQUESTER])
@@ -226,9 +231,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                                 }
                             }
                             $row['values'][] = implode('<br>', $requesters);
-                            /************************************************************demandeur */
+                            //************************************************************demandeur 
 
-                            /************************************************************elements associés */
+                            //************************************************************elements associés 
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
@@ -240,9 +245,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                             }
 
                             $row['values'][] = implode('<br>', $associated_elements);
-                            /************************************************************elements associés */
+                            //************************************************************elements associés 
 
-                            /************************************************************descritpion */
+                            //************************************************************descritpion 
                             $ticket_id = $data['id'];
                             $ticket_name = $data['name'];
                             $ticket_content = $data['content'];
@@ -261,7 +266,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             );
                             $link .= $ticket_name;
                             $row['values'][] = $link;
-                            /************************************************************descritpion */
+                            //************************************************************descritpion 
 
                         $twig_params['rows'][] = $row;
 
@@ -279,7 +284,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             // _____________________________ TABLEAU 1 _____________________________
 
             //******************************************************************* */
-            // _____________________________ TABLEAU 2 _____________________________
+            // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS
             echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;">';
             echo '<div class="card">';
             echo '<div class="card-body p-0">';
@@ -297,35 +302,19 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count = count($iterator);
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-                $options['criteria'] = [
-                    [
-                        'field'        => 8,
-                        'searchtype'   => 'equals',
-                        'value'        => $id_group,
-                        'link'         => 'AND',
-                    ],
-                    [
-                        'link' => 'AND',
-                        'criteria' => [
-                            [
-                                'link'        => 'AND',
-                                'field'       => 12,
-                                'searchtype'  => 'equals',
-                                'value'       => Ticket::INCOMING,
-                            ],
-                            [
-                                'link'        => 'OR',
-                                'field'       => 12,
-                                'searchtype'  => 'equals',
-                                'value'       => 'process',
-                            ]
-                        ]
-                    ]
-                ];
+                $options['criteria'][0]['field']      = 12; // status
+                $options['criteria'][0]['searchtype'] = 'equals';
+                $options['criteria'][0]['value']      = 'notold';
+                $options['criteria'][0]['link']       = 'AND';
+
+                $options['criteria'][1]['field']      = 71; // groups_id
+                $options['criteria'][1]['searchtype'] = 'equals';
+                $options['criteria'][1]['value']      = $id_group;
+                $options['criteria'][1]['link']       = 'AND';
 
                 $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
                 Toolbox::append_params($options, '&amp;') . "\">" .
-                Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
+                Html::makeTitle(__('Your tickets in progress'), $displayed_row_count, $total_row_count) . "</a>";
 
                 $twig_params = [
                     'class'        => 'table table-borderless table-striped table-hover card-table',
@@ -360,7 +349,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator as $data) {
 
-                        if ($i == $displayed_row_count_max) {
+                        if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
 
