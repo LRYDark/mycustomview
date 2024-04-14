@@ -44,7 +44,7 @@ class PluginMycustomviewMyview extends CommonDBTM
       }
       if ($item->getType() == 'Central') {
 
-        $group   = new PluginMycustomviewPreference();;
+        $group   = new PluginMycustomviewPreference();
         $result  = $group->find();
         $tabs = [];
   
@@ -73,7 +73,7 @@ class PluginMycustomviewMyview extends CommonDBTM
       global $PLUGIN_HOOKS, $DB;
 
       if ($item->getType() == 'Central') {
-        $group   = new PluginMycustomviewPreference();;
+        $group   = new PluginMycustomviewPreference();
         $result  = $group->find();
         $i = 0;
         foreach ($result as $data) {
@@ -92,178 +92,370 @@ class PluginMycustomviewMyview extends CommonDBTM
      return true;
    }
 
-   public static function showMyViewGroup($i)
-   {
-      global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
-    
-    //***************************************************REQUETE */
-    $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+    public static function showMyViewGroup($id_group){
+        global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
+
+        g$glpi_config = new config();
+
+        $displayed_row_count_max = 2;
+        
+        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 183px;">';
+            // _____________________________ TABLEAU 1 _____________________________
+
+            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;">';
+            echo '<div class="card">';
+            echo '<div class="card-body p-0">';
+                //***************************************************REQUETE */
+                $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                            LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
+                                WHERE glpi_groups_tickets.groups_id = $id_group 
+                                    AND glpi_tickets.status IN ('2', '3')
+                                    AND glpi_tickets.is_deleted = 0
+                                    ORDER BY glpi_tickets.date_mod DESC;";
+                //***************************************************REQUETE */
+
+                // Variables (requete)
+                $iterator = $DB->request($criteria);
+                $total_row_count = count($iterator);
+                $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
+
+                $options['criteria'] = [
+                    [
+                        'field'        => 8,
+                        'searchtype'   => 'equals',
+                        'value'        => $id_group,
+                        'link'         => 'AND',
+                    ],
+                    [
+                        'link' => 'AND',
+                        'criteria' => [
+                            [
+                                'link'        => 'AND',
+                                'field'       => 12,
+                                'searchtype'  => 'equals',
+                                'value'       => Ticket::INCOMING,
+                            ],
+                            [
+                                'link'        => 'OR',
+                                'field'       => 12,
+                                'searchtype'  => 'equals',
+                                'value'       => 'process',
+                            ]
+                        ]
+                    ]
+                ];
+
+                $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                Toolbox::append_params($options, '&amp;') . "\">" .
+                Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
+
+                $twig_params = [
+                    'class'        => 'table table-borderless table-striped table-hover card-table',
+                    'header_rows'  => [
+                        [
+                            [
+                                'colspan'   => 4,
+                                'content'   => $main_header
+                            ],
+                        ]
+                    ],
+                    'rows'         => []
+                ];
+
+                if ($displayed_row_count > 0) {
+                    $twig_params['header_rows'][] = [
+                        [
+                            'content'   => __('ID'),
+                            'style'     => 'width: 75px'
+                        ],
+                        [
+                            'content'   => _n('Requester', 'Requesters', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        [
+                            'content'   => _n('Entity', 'Entity', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        __('Description')
+                    ];
+
+                    $i = 0;
+                    foreach ($iterator as $data) {
+
+                        if ($i == $displayed_row_count_max) {
+                            break;
+                        }
+
+                        $row = [
+                            'values' => []
+                        ];
+                            /************************************************************ID */
+                            $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
+                            $ID = $data['id'];
+                            $row['values'][] = [
+                                'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
+                            ];
+                            /************************************************************ID */
+
+                            /************************************************************demandeur */
+                            $requesters = [];
+                            if (
+                                isset($job->users[CommonITILActor::REQUESTER])
+                                && count($job->users[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
+                                    if ($d["users_id"] > 0) {
+                                        $userdata = getUserName($d["users_id"], 2);
+                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
+                                            $userdata['name'];
+                                        $requesters[] = $name;
+                                    } else {
+                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
+                                            $d['alternative_email'];
+                                    }
+                                }
+                            }
+
+                            if (
+                                isset($job->groups[CommonITILActor::REQUESTER])
+                                && count($job->groups[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
+                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
+                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
+                                }
+                            }
+                            $row['values'][] = implode('<br>', $requesters);
+                            /************************************************************demandeur */
+
+                            /************************************************************elements associés */
+                            $associated_elements = [];
+                            $entity_id = $data['entities_id'];
+
+                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            if(!empty($result->completename)){
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                            }else{
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                            }
+
+                            $row['values'][] = implode('<br>', $associated_elements);
+                            /************************************************************elements associés */
+
+                            /************************************************************descritpion */
+                            $ticket_id = $data['id'];
+                            $ticket_name = $data['name'];
+                            $ticket_content = $data['content'];
+                            
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
+                            $link .= "'>";
+                            $link = sprintf(
+                                __('%1$s %2$s'),
+                                $link,
+                                Html::showToolTip(
+                                    Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
+                                    ['applyto' => 'ticket' . $ticket_id,
+                                        'display' => false
+                                    ]
+                                )
+                            );
+                            $link .= $ticket_name;
+                            $row['values'][] = $link;
+                            /************************************************************descritpion */
+
+                        $twig_params['rows'][] = $row;
+
+                        if ($i == $displayed_row_count) {
+                            break;
+                        }
+                        $i++;
+                    }
+                    $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
+                    echo $output;
+                }
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            // _____________________________ TABLEAU 1 _____________________________
+
+            //******************************************************************* */
+            // _____________________________ TABLEAU 2 _____________________________
+            echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;">';
+            echo '<div class="card">';
+            echo '<div class="card-body p-0">';
+                //***************************************************REQUETE */
+                $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
-                    WHERE glpi_groups_tickets.groups_id = $i 
+                    WHERE glpi_groups_tickets.groups_id = $id_group 
                         AND glpi_tickets.status IN ('2', '3')
                         AND glpi_tickets.is_deleted = 0
                         ORDER BY glpi_tickets.date_mod DESC;";
-    //***************************************************REQUETE */
+                //***************************************************REQUETE */
 
-    // Variables (requete)
-    $iterator = $DB->request($criteria);
-    $total_row_count = count($iterator);
-    $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
+                // Variables (requete)
+                $iterator = $DB->request($criteria);
+                $total_row_count = count($iterator);
+                $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-    //***************************************************TABLEAU */
-
-    $options['criteria'] = [
-        [
-            'field'        => 8,
-            'searchtype'   => 'equals',
-            'value'        => $i,
-            'link'         => 'AND',
-        ],
-        [
-            'link' => 'AND',
-            'criteria' => [
-                [
-                    'link'        => 'AND',
-                    'field'       => 12,
-                    'searchtype'  => 'equals',
-                    'value'       => Ticket::INCOMING,
-                ],
-                [
-                    'link'        => 'OR',
-                    'field'       => 12,
-                    'searchtype'  => 'equals',
-                    'value'       => 'process',
-                ]
-            ]
-        ]
-    ];
-
-      $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
-      Toolbox::append_params($options, '&amp;') . "\">" .
-      //Toolbox::append_params("test", '&amp;') . "\">" .
-      Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
-
-      $twig_params = [
-        'class'        => 'table table-borderless table-striped table-hover card-table',
-        'header_rows'  => [
-            [
-                [
-                    'colspan'   => 4,
-                    'content'   => $main_header
-                ],
-            ]
-        ],
-        'rows'         => []
-    ];
-    $twig_params['header_rows'][] = [
-        [
-            'content'   => __('ID'),
-            'style'     => 'width: 75px'
-        ],
-        [
-            'content'   => _n('Requester', 'Requesters', 1),
-            'style'     => 'width: 20%'
-        ],
-        [
-            'content'   => _n('Entity', 'Entity', 1),
-            'style'     => 'width: 15%'
-        ],
-        __('Description')
-    ];
-    //***************************************************TABLEAU */
-    $i = 0;
-    foreach ($iterator as $data) {
-        $showprivate = false;
-        if (Session::haveRight('followup', ITILFollowup::SEEPRIVATE)) {
-            $showprivate = true;
-        }
-
-        $row = [
-            'values' => []
-        ];
-            /************************************************************ID */
-            $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
-            $ID = $data['id'];
-            $row['values'][] = [
-                'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
-            ];
-            /************************************************************ID */
-
-            /************************************************************demandeur */
-            $requesters = [];
-            if (
-                isset($job->users[CommonITILActor::REQUESTER])
-                && count($job->users[CommonITILActor::REQUESTER])
-            ) {
-                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
-                    if ($d["users_id"] > 0) {
-                        $userdata = getUserName($d["users_id"], 2);
-                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
-                            $userdata['name'];
-                        $requesters[] = $name;
-                    } else {
-                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
-                            $d['alternative_email'];
-                    }
-                }
-            }
-
-            if (
-                isset($job->groups[CommonITILActor::REQUESTER])
-                && count($job->groups[CommonITILActor::REQUESTER])
-            ) {
-                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
-                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
-                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
-                }
-            }
-            $row['values'][] = implode('<br>', $requesters);
-            /************************************************************demandeur */
-
-            /************************************************************elements associés */
-            $associated_elements = [];
-            $entity_id = $data['entities_id'];
-
-            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-            if(!empty($result->completename)){
-                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
-            }else{
-                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
-            }
-
-            $row['values'][] = implode('<br>', $associated_elements);
-            /************************************************************elements associés */
-
-            /************************************************************descritpion */
-            $ticket_id = $data['id'];
-            $ticket_name = $data['name'];
-            $ticket_content = $data['content'];
-            
-            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
-            $link .= "'>";
-            $link = sprintf(
-                __('%1$s %2$s'),
-                $link,
-                Html::showToolTip(
-                    Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
-                    ['applyto' => 'ticket' . $ticket_id,
-                        'display' => false
+                $options['criteria'] = [
+                    [
+                        'field'        => 8,
+                        'searchtype'   => 'equals',
+                        'value'        => $id_group,
+                        'link'         => 'AND',
+                    ],
+                    [
+                        'link' => 'AND',
+                        'criteria' => [
+                            [
+                                'link'        => 'AND',
+                                'field'       => 12,
+                                'searchtype'  => 'equals',
+                                'value'       => Ticket::INCOMING,
+                            ],
+                            [
+                                'link'        => 'OR',
+                                'field'       => 12,
+                                'searchtype'  => 'equals',
+                                'value'       => 'process',
+                            ]
+                        ]
                     ]
-                )
-            );
-            $link .= $ticket_name;
-            $row['values'][] = $link;
-            /************************************************************descritpion */
+                ];
 
-        $twig_params['rows'][] = $row;
+                $main_header = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                Toolbox::append_params($options, '&amp;') . "\">" .
+                Html::makeTitle(__('Tickets to be processed'), $displayed_row_count, $total_row_count) . "</a>";
 
-        $i++;
-        if ($i == $displayed_row_count) {
-            break;
-        }
+                $twig_params = [
+                    'class'        => 'table table-borderless table-striped table-hover card-table',
+                    'header_rows'  => [
+                        [
+                            [
+                                'colspan'   => 4,
+                                'content'   => $main_header
+                            ],
+                        ]
+                    ],
+                    'rows'         => []
+                ];
+
+                if ($displayed_row_count > 0) {
+                    $twig_params['header_rows'][] = [
+                        [
+                            'content'   => __('ID'),
+                            'style'     => 'width: 75px'
+                        ],
+                        [
+                            'content'   => _n('Requester', 'Requesters', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        [
+                            'content'   => _n('Entity', 'Entity', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        __('Description')
+                    ];
+
+                    $i = 0;
+                    foreach ($iterator as $data) {
+
+                        if ($i == $displayed_row_count_max) {
+                            break;
+                        }
+
+                        $row = [
+                            'values' => []
+                        ];
+                            /************************************************************ID */
+                            $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
+                            $ID = $data['id'];
+                            $row['values'][] = [
+                                'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
+                            ];
+                            /************************************************************ID */
+
+                            /************************************************************demandeur */
+                            $requesters = [];
+                            if (
+                                isset($job->users[CommonITILActor::REQUESTER])
+                                && count($job->users[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
+                                    if ($d["users_id"] > 0) {
+                                        $userdata = getUserName($d["users_id"], 2);
+                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
+                                            $userdata['name'];
+                                        $requesters[] = $name;
+                                    } else {
+                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
+                                            $d['alternative_email'];
+                                    }
+                                }
+                            }
+
+                            if (
+                                isset($job->groups[CommonITILActor::REQUESTER])
+                                && count($job->groups[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
+                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
+                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
+                                }
+                            }
+                            $row['values'][] = implode('<br>', $requesters);
+                            /************************************************************demandeur */
+
+                            /************************************************************elements associés */
+                            $associated_elements = [];
+                            $entity_id = $data['entities_id'];
+
+                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            if(!empty($result->completename)){
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->completename)." </span>";
+                            }else{
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center mb-2' style='margin-top:3px'> ".__($result->name)." </span>";
+                            }
+
+                            $row['values'][] = implode('<br>', $associated_elements);
+                            /************************************************************elements associés */
+
+                            /************************************************************descritpion */
+                            $ticket_id = $data['id'];
+                            $ticket_name = $data['name'];
+                            $ticket_content = $data['content'];
+                            
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
+                            $link .= "'>";
+                            $link = sprintf(
+                                __('%1$s %2$s'),
+                                $link,
+                                Html::showToolTip(
+                                    Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
+                                    ['applyto' => 'ticket' . $ticket_id,
+                                        'display' => false
+                                    ]
+                                )
+                            );
+                            $link .= $ticket_name;
+                            $row['values'][] = $link;
+                            /************************************************************descritpion */
+
+                        $twig_params['rows'][] = $row;
+
+                        if ($i == $displayed_row_count) {
+                            break;
+                        }
+                        $i++;
+                    }
+                    $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
+                    echo $output;
+                }
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            // _____________________________ TABLEAU 2 _____________________________
+
+        echo '</div>';
     }
-    $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
-    echo $output;
-
-   }
 }
