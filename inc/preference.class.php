@@ -129,6 +129,9 @@ class PluginMycustomviewPreference extends CommonDBTM {
       }
       echo "</td></tr>";
 
+      echo "<tr class='tab_bg_1 center'><td colspan='2'>
+      <span style=\"font-weight:bold; color:red\">" . __("Votre administrateur a limité l'affichage des groupes à : ". $var, 'rp') . "</td></span></tr>";
+
       echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets à traiter', 'rp') . "</td>";
       echo "<td>";
       Dropdown::showYesNo("Tickets_to_be_processed", $self->fields["Tickets_to_be_processed"]);

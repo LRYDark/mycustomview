@@ -72,7 +72,7 @@ function plugin_mycustomview_install()
       $DB->insert(
          'glpi_plugin_mycustomview_config',
          [
-            'max_filters' => 6
+            'max_filters' => 4
          ]
       );
    }
