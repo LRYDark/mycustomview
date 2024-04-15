@@ -128,7 +128,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count = count($iterator);
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-                if ($displayed_row_count > 0 && $pref->Current_tickets != 0) {
+                if ($displayed_row_count > 0 && $pref->Tickets_to_be_processed != 0) {
                     array_push( $tableau_space, $total_row_count);
 
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
@@ -322,7 +322,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count2 = count($iterator2);
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
-                if ($displayed_row_count2 > 0 && $pref->Tickets_to_be_processed != 0) {
+                if ($displayed_row_count2 > 0 && $pref->Current_tickets != 0) {
                     array_push($tableau_space, $total_row_count2);
                     
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
