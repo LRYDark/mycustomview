@@ -209,6 +209,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator as $data) {
 
+                        if($glpi_config->display_count_on_home == NULL){
+                            $glpi_config->display_count_on_home = 5;
+                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -387,6 +390,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator2 as $data) {
 
+                        if($glpi_config->display_count_on_home == null){
+                            $glpi_config->display_count_on_home = 5;
+                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -566,6 +572,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator3 as $data) {
 
+                        if($glpi_config->display_count_on_home == null){
+                            $glpi_config->display_count_on_home = 5;
+                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -749,6 +758,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator4 as $data) {
 
+                        if($glpi_config->display_count_on_home == null){
+                            $glpi_config->display_count_on_home = 5;
+                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -943,6 +955,9 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator10 as $data) {
 
+                        if($glpi_config->display_count_on_home == null){
+                            $glpi_config->display_count_on_home = 5;
+                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
