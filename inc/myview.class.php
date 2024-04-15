@@ -51,18 +51,19 @@ class PluginMycustomviewMyview extends CommonDBTM
         $i = 0;
         foreach ($result as $data) {
            $groups_id = $data['groups_id'];
-           $group_id = json_decode($groups_id);
-           foreach ($group_id as $data) {
-              $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
-              if(!empty($result->comment)){
-                  array_push($tabs, __($result->comment, "mycustomview"));
-               }elseif(!empty($result->name)){
-                  array_push($tabs, __($result->name, "mycustomview"));
-               }
-              $i++;
+           if(!empty($groups_id)){
+                $group_id = json_decode($groups_id);
+                foreach ($group_id as $data) {
+                $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
+                if(!empty($result->comment)){
+                    array_push($tabs, __($result->comment, "mycustomview"));
+                    }elseif(!empty($result->name)){
+                    array_push($tabs, __($result->name, "mycustomview"));
+                    }
+                $i++;
+                }
            }
         }
-
         return $tabs;
       }
       return '';
@@ -128,8 +129,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count > 0) {
                     array_push( $tableau_space, $total_row_count);
 
-                    if($tableau_nbr > 1){
+                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
                         $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
+                    }elseif ($tableau_nbr >= 4){
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
                     }
 
                     if ($tableau_nbr % 2 == 0) {
@@ -320,8 +323,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count2 > 0) {
                     array_push($tableau_space, $total_row_count2);
                     
-                    if($tableau_nbr > 1){
+                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
                         $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
+                    }elseif ($tableau_nbr >= 4){
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
                     }
                     
                     if ($tableau_nbr % 2 == 0) {
@@ -331,8 +336,8 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $tableau_nbr ++;
 
-                    //echo '<div class="card">';
-                    //echo '<div class="card-body p-0">';
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
 
                     $options2['criteria'][0]['field']      = 12; // status
                     $options2['criteria'][0]['searchtype'] = 'equals';
@@ -463,7 +468,7 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                         $twig_params['rows'][] = $row;
 
-                        if ($i == $displayed_row_count) {
+                        if ($i == $displayed_row_count2) {
                             break;
                         }
                         $i++;
@@ -497,8 +502,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count3 > 0) {
                     array_push( $tableau_space, $total_row_count3);
 
-                    if($tableau_nbr > 1){
+                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
                         $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
+                    }elseif ($tableau_nbr >= 4){
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
                     }
                     
                     if ($tableau_nbr % 2 == 0) {
@@ -653,6 +660,189 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                 }
             // _____________________________ TABLEAU 3 _____________________________
+
+            //******************************************************************* */
+            // _____________________________ TABLEAU 4 _____________________________ VOS TICKETS OBSERVES 'observed'
+                //***************************************************REQUETE */
+                $status_ticket_incoming     = Ticket::INCOMING;
+                $status_ticket_planned      = Ticket::PLANNED;
+                $status_ticket_assigned     = Ticket::ASSIGNED;
+                $status_ticket_waiting      = Ticket::WAITING;
+                $criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                            LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
+                                WHERE glpi_groups_tickets.groups_id = $id_group 
+                                    AND glpi_tickets.status IN ('$status_ticket_incoming', '$status_ticket_planned' , '$status_ticket_assigned' , '$status_ticket_waiting')
+                                    AND glpi_tickets.is_deleted = 0
+                                    AND glpi_groups_tickets.type = 3
+                                    ORDER BY glpi_tickets.date_mod DESC;";
+                //***************************************************REQUETE */
+
+                // Variables (requete)
+                $iterator4 = $DB->request($criteria4);
+                $total_row_count4 = count($iterator4);
+                $displayed_row_count4 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count4);
+
+                if ($displayed_row_count4 > 0) {
+                    array_push($tableau_space, $total_row_count4);
+                    
+                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
+                    }elseif ($tableau_nbr >= 4){
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
+                    }
+                    
+                    if ($tableau_nbr % 2 == 0) {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                    } else {
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                    }
+                    $tableau_nbr ++;
+                    
+                    echo '<div class="card">';
+                    echo '<div class="card-body p-0">';
+
+                    $options4['criteria'][0]['field']      = 12; // status
+                    $options4['criteria'][0]['searchtype'] = 'equals';
+                    $options4['criteria'][0]['value']      = 'notold';
+                    $options4['criteria'][0]['link']       = 'AND';
+
+                    $options4['criteria'][1]['field']      = 65; // groups_id
+                    $options4['criteria'][1]['searchtype'] = 'equals';
+                    $options4['criteria'][1]['value']      = $id_group;
+                    $options4['criteria'][1]['link']       = 'AND';
+
+                    $main_header4 = "<a href=\"" . Ticket::getSearchURL() . "?" .
+                    Toolbox::append_params($options4, '&amp;') . "\">" .
+                    Html::makeTitle(__('Your observed tickets'), $displayed_row_count4, $total_row_count4) . "</a>";
+
+                    $twig_params = [
+                        'class'        => 'table table-borderless table-striped table-hover card-table',
+                        'header_rows'  => [
+                            [
+                                [
+                                    'colspan'   => 4,
+                                    'content'   => $main_header4
+                                ],
+                            ]
+                        ],
+                        'rows'         => []
+                    ];
+
+                    $twig_params['header_rows'][] = [
+                        [
+                            'content'   => __('ID'),
+                            'style'     => 'width: 75px'
+                        ],
+                        [
+                            'content'   => _n('Requester', 'Requesters', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        [
+                            'content'   => _n('Entity', 'Entity', 1),
+                            'style'     => 'width: 20%'
+                        ],
+                        __('Description')
+                    ];
+
+                    $i = 0;
+                    foreach ($iterator4 as $data) {
+
+                        if ($i == $glpi_config->display_count_on_home) {
+                            break;
+                        }
+
+                        $row = [
+                            'values' => []
+                        ];
+                            /************************************************************ID */
+                            $bgcolor = $_SESSION["glpipriority_" . $data["priority"]];
+                            $ID = $data['id'];
+                            $row['values'][] = [
+                                'content' => "<div class='priority_block' style='border-color: $bgcolor'><span style='background: $bgcolor'></span>&nbsp;$ID</div>"
+                            ];
+                            /************************************************************ID */
+
+                            /************************************************************demandeur */
+                            $requesters = [];
+                            if (
+                                isset($job->users[CommonITILActor::REQUESTER])
+                                && count($job->users[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
+                                    if ($d["users_id"] > 0) {
+                                        $userdata = getUserName($d["users_id"], 2);
+                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
+                                            $userdata['name'];
+                                        $requesters[] = $name;
+                                    } else {
+                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
+                                            $d['alternative_email'];
+                                    }
+                                }
+                            }
+
+                            if (
+                                isset($job->groups[CommonITILActor::REQUESTER])
+                                && count($job->groups[CommonITILActor::REQUESTER])
+                            ) {
+                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
+                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
+                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
+                                }
+                            }
+                            $row['values'][] = implode('<br>', $requesters);
+                            /************************************************************demandeur */
+
+                            /************************************************************elements associés */
+                            $associated_elements = [];
+                            $entity_id = $data['entities_id'];
+
+                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            if(!empty($result->completename)){
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
+                            }else{
+                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
+                            }
+
+                            $row['values'][] = implode('<br>', $associated_elements);
+                            /************************************************************elements associés */
+
+                            /************************************************************descritpion */
+                            $ticket_id = $data['id'];
+                            $ticket_name = $data['name'];
+                            $ticket_content = $data['content'];
+                            
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
+                            $link .= "'>";
+                            $link = sprintf(
+                                __('%1$s %2$s'),
+                                $link,
+                                Html::showToolTip(
+                                    Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
+                                    ['applyto' => 'ticket' . $ticket_id,
+                                        'display' => false
+                                    ]
+                                )
+                            );
+                            $link .= $ticket_name;
+                            $row['values'][] = $link;
+                            /************************************************************descritpion */
+
+                        $twig_params['rows'][] = $row;
+
+                        if ($i == $displayed_row_count4) {
+                            break;
+                        }
+                        $i++;
+                    }
+                    $output = TemplateRenderer::getInstance()->render('components/table.html.twig', $twig_params);
+                    echo $output;
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            // _____________________________ TABLEAU 4 _____________________________
                         
             //******************************************************************* */
             // _____________________________ TABLEAU 10 _____________________________ VOS TACHES DE TICKET A TRAITER 
@@ -669,15 +859,16 @@ class PluginMycustomviewMyview extends CommonDBTM
                 
                 // Variables (requete)
                 $iterator10 = $DB->request($criteria10);
-                //print_r($iterator3);
                 $total_row_count10 = count($iterator10);
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
                 if ($displayed_row_count10 > 0) {
                     array_push($tableau_space, $total_row_count10);
 
-                    if($tableau_nbr > 1){
+                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
                         $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
+                    }elseif ($tableau_nbr >= 4){
+                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
                     }
 
                     if ($tableau_nbr % 2 == 0) {
@@ -689,7 +880,7 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                     echo '<div class="card">';
                     echo '<div class="card-body p-0">';
-
+                    
                     $options10 = [
                         'reset'    => 'reset',
                         'criteria' => [
