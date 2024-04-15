@@ -101,11 +101,13 @@ class PluginMycustomviewMyview extends CommonDBTM
     public static function showMyViewGroup($id_group){
         global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
 
+        $user_id = session::getLoginUserID();
+        $pref = $DB->query("SELECT * FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
+
         $tableau_nbr = 0;
         $taille_space = 0;
         $tableau_space = [];
 
-        $user_id = session::getLoginUserID();
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 600px;">';
@@ -126,7 +128,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count = count($iterator);
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
-                if ($displayed_row_count > 0) {
+                if ($displayed_row_count > 0 && $pref->Current_tickets != 0) {
                     array_push( $tableau_space, $total_row_count);
 
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
@@ -320,7 +322,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count2 = count($iterator2);
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
-                if ($displayed_row_count2 > 0) {
+                if ($displayed_row_count2 > 0 && $pref->Tickets_to_be_processed != 0) {
                     array_push($tableau_space, $total_row_count2);
                     
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
@@ -499,7 +501,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count3 = count($iterator3);
                 $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
 
-                if ($displayed_row_count3 > 0) {
+                if ($displayed_row_count3 > 0 && $pref->Pending_tickets != 0) {
                     array_push( $tableau_space, $total_row_count3);
 
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
@@ -682,7 +684,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count4 = count($iterator4);
                 $displayed_row_count4 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count4);
 
-                if ($displayed_row_count4 > 0) {
+                if ($displayed_row_count4 > 0 && $pref->Observed_tickets != 0) {
                     array_push($tableau_space, $total_row_count4);
                     
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
@@ -862,7 +864,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $total_row_count10 = count($iterator10);
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
-                if ($displayed_row_count10 > 0) {
+                if ($displayed_row_count10 > 0 && $pref->Ticket_tasks_to_be_addressed != 0) {
                     array_push($tableau_space, $total_row_count10);
 
                     if ($tableau_nbr > 1 && $tableau_nbr < 4) {
