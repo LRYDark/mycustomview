@@ -26,7 +26,7 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '2.0.1');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.0');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));
@@ -68,9 +68,9 @@ function plugin_version_mycustomview()
    return [
       'name'           => 'MyCustomView',
       'version'        => PLUGIN_MYCUSTOMVIEW_VERSION,
-      'author'         => 'Maxime MERIOT',
+      'author'         => 'REINERT Joris',
       'license'        => 'GPLv3+',
-      'homepage'       => 'https://github.com/departement-maine-et-loire/mycustomview',
+      'homepage'       => 'https://github.com/LRYDark/mycustomview/releases',
       'requirements'   => [
          'glpi' => [
             'min' => '10.0',
