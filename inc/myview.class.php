@@ -114,7 +114,7 @@ class PluginMycustomviewMyview extends CommonDBTM
         
             // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
-                $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status IN ('1', '2')
@@ -182,7 +182,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'header_rows'  => [
                             [
                                 [
-                                    'colspan'   => 4,
+                                    'colspan'   => 5,
                                     'content'   => $main_header
                                 ],
                             ]
@@ -196,8 +196,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                             'style'     => 'width: 75px',
                         ],
                         [
-                            'content'   => _n('Requester', 'Requesters', 1),
-                            'style'     => 'width: 20%',
+                            'content'   => _n('Date de création', 'Date de création', 1),
+                            'style'     => 'width: 15%',
+                        ],
+                        [
+                            'content'   => _n('Date de modification', 'Date de modification', 1),
+                            'style'     => 'width: 18%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -227,36 +231,17 @@ class PluginMycustomviewMyview extends CommonDBTM
                             ];
                             //************************************************************ID 
 
-                            //************************************************************demandeur 
-                            $requesters = [];
-                            if (
-                                isset($job->users[CommonITILActor::REQUESTER])
-                                && count($job->users[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
-                                    if ($d["users_id"] > 0) {
-                                        $userdata = getUserName($d["users_id"], 2);
-                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
-                                            $userdata['name'];
-                                        $requesters[] = $name;
-                                    } else {
-                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
-                                            $d['alternative_email'];
-                                    }
-                                }
-                            }
+                            //************************************************************DATE CREATION
+                            $timestamp = strtotime($data['date_creation']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE CREATION
 
-                            if (
-                                isset($job->groups[CommonITILActor::REQUESTER])
-                                && count($job->groups[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
-                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
-                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
-                                }
-                            }
-                            $row['values'][] = implode('<br>', $requesters);
-                            //************************************************************demandeur 
+                            //************************************************************DATE MODIFICATION
+                            $timestamp = strtotime($data['date_mod']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE MODIFICATION 
 
                             //************************************************************elements associés 
                             $associated_elements = [];
@@ -312,7 +297,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
             // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS 'requestbyself'
                 //***************************************************REQUETE */
-                $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.is_deleted = 0
@@ -363,7 +348,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'header_rows'  => [
                             [
                                 [
-                                    'colspan'   => 4,
+                                    'colspan'   => 5,
                                     'content'   => $main_header2
                                 ],
                             ]
@@ -377,8 +362,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                             'style'     => 'width: 75px'
                         ],
                         [
-                            'content'   => _n('Requester', 'Requesters', 1),
-                            'style'     => 'width: 20%'
+                            'content'   => _n('Date de création', 'Date de création', 1),
+                            'style'     => 'width: 15%',
+                        ],
+                        [
+                            'content'   => _n('Date de modification', 'Date de modification', 1),
+                            'style'     => 'width: 18%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -408,36 +397,17 @@ class PluginMycustomviewMyview extends CommonDBTM
                             ];
                             /************************************************************ID */
 
-                            /************************************************************demandeur */
-                            $requesters = [];
-                            if (
-                                isset($job->users[CommonITILActor::REQUESTER])
-                                && count($job->users[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
-                                    if ($d["users_id"] > 0) {
-                                        $userdata = getUserName($d["users_id"], 2);
-                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
-                                            $userdata['name'];
-                                        $requesters[] = $name;
-                                    } else {
-                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
-                                            $d['alternative_email'];
-                                    }
-                                }
-                            }
+                            //************************************************************DATE CREATION
+                            $timestamp = strtotime($data['date_creation']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE CREATION 
 
-                            if (
-                                isset($job->groups[CommonITILActor::REQUESTER])
-                                && count($job->groups[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
-                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
-                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
-                                }
-                            }
-                            $row['values'][] = implode('<br>', $requesters);
-                            /************************************************************demandeur */
+                            //************************************************************DATE MODIFICATION
+                            $timestamp = strtotime($data['date_mod']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
                             $associated_elements = [];
@@ -493,7 +463,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
             // _____________________________ TABLEAU 3 _____________________________ TICKET EN ATTENTE 'waiting'
                 //***************************************************REQUETE */
-                $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status = 4
@@ -545,7 +515,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'header_rows'  => [
                             [
                                 [
-                                    'colspan'   => 4,
+                                    'colspan'   => 5,
                                     'content'   => $main_header3
                                 ],
                             ]
@@ -559,8 +529,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                             'style'     => 'width: 75px'
                         ],
                         [
-                            'content'   => _n('Requester', 'Requesters', 1),
-                            'style'     => 'width: 20%'
+                            'content'   => _n('Date de création', 'Date de création', 1),
+                            'style'     => 'width: 15%',
+                        ],
+                        [
+                            'content'   => _n('Date de modification', 'Date de modification', 1),
+                            'style'     => 'width: 18%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -590,36 +564,17 @@ class PluginMycustomviewMyview extends CommonDBTM
                             ];
                             /************************************************************ID */
 
-                            /************************************************************demandeur */
-                            $requesters = [];
-                            if (
-                                isset($job->users[CommonITILActor::REQUESTER])
-                                && count($job->users[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
-                                    if ($d["users_id"] > 0) {
-                                        $userdata = getUserName($d["users_id"], 2);
-                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
-                                            $userdata['name'];
-                                        $requesters[] = $name;
-                                    } else {
-                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
-                                            $d['alternative_email'];
-                                    }
-                                }
-                            }
-
-                            if (
-                                isset($job->groups[CommonITILActor::REQUESTER])
-                                && count($job->groups[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
-                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
-                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
-                                }
-                            }
-                            $row['values'][] = implode('<br>', $requesters);
-                            /************************************************************demandeur */
+                            //************************************************************DATE CREATION
+                            $timestamp = strtotime($data['date_creation']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE CREATION 
+                            
+                            //************************************************************DATE MODIFICATION
+                            $timestamp = strtotime($data['date_mod']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
                             $associated_elements = [];
@@ -679,7 +634,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $status_ticket_planned      = Ticket::PLANNED;
                 $status_ticket_assigned     = Ticket::ASSIGNED;
                 $status_ticket_waiting      = Ticket::WAITING;
-                $criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority FROM glpi_tickets 
+                $criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status IN ('$status_ticket_incoming', '$status_ticket_planned' , '$status_ticket_assigned' , '$status_ticket_waiting')
@@ -731,7 +686,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'header_rows'  => [
                             [
                                 [
-                                    'colspan'   => 4,
+                                    'colspan'   => 5,
                                     'content'   => $main_header4
                                 ],
                             ]
@@ -745,8 +700,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                             'style'     => 'width: 75px'
                         ],
                         [
-                            'content'   => _n('Requester', 'Requesters', 1),
-                            'style'     => 'width: 20%'
+                            'content'   => _n('Date de création', 'Date de création', 1),
+                            'style'     => 'width: 15%',
+                        ],
+                        [
+                            'content'   => _n('Date de modification', 'Date de modification', 1),
+                            'style'     => 'width: 18%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -776,36 +735,17 @@ class PluginMycustomviewMyview extends CommonDBTM
                             ];
                             /************************************************************ID */
 
-                            /************************************************************demandeur */
-                            $requesters = [];
-                            if (
-                                isset($job->users[CommonITILActor::REQUESTER])
-                                && count($job->users[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->users[CommonITILActor::REQUESTER] as $d) {
-                                    if ($d["users_id"] > 0) {
-                                        $userdata = getUserName($d["users_id"], 2);
-                                        $name = '<i class="fas fa-sm fa-fw fa-user text-muted me-1"></i>' .
-                                            $userdata['name'];
-                                        $requesters[] = $name;
-                                    } else {
-                                        $requesters[] = '<i class="fas fa-sm fa-fw fa-envelope text-muted me-1"></i>' .
-                                            $d['alternative_email'];
-                                    }
-                                }
-                            }
-
-                            if (
-                                isset($job->groups[CommonITILActor::REQUESTER])
-                                && count($job->groups[CommonITILActor::REQUESTER])
-                            ) {
-                                foreach ($job->groups[CommonITILActor::REQUESTER] as $d) {
-                                    $requesters[] = '<i class="fas fa-sm fa-fw fa-users text-muted me-1"></i>' .
-                                        Dropdown::getDropdownName("glpi_groups", $d["groups_id"]);
-                                }
-                            }
-                            $row['values'][] = implode('<br>', $requesters);
-                            /************************************************************demandeur */
+                            //************************************************************DATE CREATION
+                            $timestamp = strtotime($data['date_creation']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE CREATION
+                            
+                            //************************************************************DATE MODIFICATION
+                            $timestamp = strtotime($data['date_mod']);
+                            $date = date("Y-m-d", $timestamp);
+                                $row['values'][] = $date;
+                            //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
                             $associated_elements = [];
