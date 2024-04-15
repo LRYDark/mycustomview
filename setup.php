@@ -53,7 +53,7 @@ function plugin_init_mycustomview()
 
    $PLUGIN_HOOKS['csrf_compliant']['mycustomview'] = true;
    // -- PAGE DE CONFIGURATION -- 
-   //$PLUGIN_HOOKS['config_page']['mycustomview'] = 'front/config.form.php';
+   $PLUGIN_HOOKS['config_page']['mycustomview'] = 'front/config.form.php';
 }
 
 

@@ -42,10 +42,7 @@ function plugin_mycustomview_install()
 
    PluginMycustomviewProfile::createFirstAccess($_SESSION["glpiactiveprofile"]["id"]);
 
-   // première installation -> Création de la table dans la base
-
    // requete de création des tables
-
    if (!$DB->TableExists("glpi_plugin_mycustomview_preferences")) {
       $query = "CREATE TABLE `glpi_plugin_mycustomview_preferences` (
          `id` int unsigned NOT NULL auto_increment,
@@ -61,6 +58,23 @@ function plugin_mycustomview_install()
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";
 
       $DB->query($query) or die("error creating glpi_plugin_mycustomview_preferences " . $DB->error());
+   }
+
+   if (!$DB->TableExists("glpi_plugin_mycustomview_config")) {
+      $query = "CREATE TABLE `glpi_plugin_mycustomview_config` (
+        `id` INT(11) NOT NULL AUTO_INCREMENT,
+        `max_filters` TINYINT,
+         PRIMARY KEY  (`id`)
+      ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+      $DB->query($query) or die("error creating glpi_plugin_mycustomview_config " . $DB->error());
+
+      $DB->insert(
+         'glpi_plugin_mycustomview_config',
+         [
+            'max_filters' => 6
+         ]
+      );
    }
 
    return true;

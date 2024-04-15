@@ -107,10 +107,12 @@ class PluginMycustomviewPreference extends CommonDBTM {
       if ($self->fields['groups_id'] == NULL) {
          Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
                                                             'width'    => 200,
+                                                            'max'      => 2,
                                                             'value'    => $self->fields["groups_id"]]);
       } else {
          Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
                                                             'width'    => 200,
+                                                            'max'      => 2,
                                                             'values'   => json_decode($self->fields["groups_id"], true)]);
       }
       echo "</td></tr>";

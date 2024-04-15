@@ -36,10 +36,16 @@ if ($_SESSION["glpiactiveprofile"]["interface"] == "central") {
    Html::helpHeader("TITRE", $_SERVER['PHP_SELF']);
 }
 
-   $users_id = $_SESSION['glpiID'];
-
    $config = new PluginMycustomviewConfig();
-   $config->showForm($users_id);
+
+   if($max_filters = $config->getMaxFilters()) {
+      $config->showForm($max_filters);
+   }
+   else 
+   {
+      $config->showForm();
+   }
    Html::closeForm();
    
+
 Html::footer();
