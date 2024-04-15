@@ -104,15 +104,31 @@ class PluginMycustomviewPreference extends CommonDBTM {
       foreach ($result as $data) {
          $groups[$data['id']] = $data['name'];
       }
+
+         /*$nbr_chiffres = preg_match_all('/\d/', $self->fields['groups_id']);
+         echo "Il y a $nbr_chiffres chiffres dans la chaîne.";*/
+         ?>
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+         <script>
+$(document).ready(function() {
+    $('select[name="groups_id[]"]').on('change', function() {
+        if ($(this).find('option:selected').length > 2) {
+            alert('Vous ne pouvez sélectionner que 3 options au maximum.');
+            $(this).find('option:selected').slice(3).prop('selected', false);
+        }
+    });
+});
+   
+         </script>
+         <?php
+
       if ($self->fields['groups_id'] == NULL) {
          Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
                                                             'width'    => 200,
-                                                            'max'      => 2,
                                                             'value'    => $self->fields["groups_id"]]);
       } else {
          Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
                                                             'width'    => 200,
-                                                            'max'      => 2,
                                                             'values'   => json_decode($self->fields["groups_id"], true)]);
       }
       echo "</td></tr>";
