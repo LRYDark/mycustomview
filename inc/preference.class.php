@@ -105,22 +105,18 @@ class PluginMycustomviewPreference extends CommonDBTM {
          $groups[$data['id']] = $data['name'];
       }
 
-         /*$nbr_chiffres = preg_match_all('/\d/', $self->fields['groups_id']);
-         echo "Il y a $nbr_chiffres chiffres dans la chaîne.";*/
-         ?>
-         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-         <script>
-$(document).ready(function() {
-    $('select[name="groups_id[]"]').on('change', function() {
-        if ($(this).find('option:selected').length > 2) {
-            alert('Vous ne pouvez sélectionner que 3 options au maximum.');
-            $(this).find('option:selected').slice(3).prop('selected', false);
-        }
-    });
-});
-   
-         </script>
-         <?php
+      $var = $DB->query("SELECT * FROM glpi_plugin_mycustomview_config WHERE id = 1")->fetch_object();
+      $var = $var->max_filters;
+      ?><script>
+         var jsvar = '<?=$var?>';
+         $(document).ready(function() {
+            $('select[name="groups_id[]"]').on('change', function() {
+               while ($(this).find('option:selected').length > jsvar) {
+                     $(this).find('option:selected').last().remove();
+               }
+            });
+         });
+      </script><?php
 
       if ($self->fields['groups_id'] == NULL) {
          Dropdown::showFromArray("groups_id", $groups, ['multiple' => true,
