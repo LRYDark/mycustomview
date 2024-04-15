@@ -51,6 +51,11 @@ function plugin_mycustomview_install()
          `id` int unsigned NOT NULL auto_increment,
          `users_id` int unsigned NOT NULL default '0',
          `groups_id` text NULL,
+         `Tickets_to_be_processed` int NULL,
+         `Ticket_tasks_to_be_addressed` int NULL,
+         `Pending_tickets` int NULL,
+         `Current_tickets` int NULL,
+         `Observed_tickets` int NULL,
          PRIMARY KEY  (`id`),
          KEY `users_id` (`users_id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";

@@ -51,8 +51,13 @@ class PluginMycustomviewPreference extends CommonDBTM {
 
    static function addDefaultPreference($users_id) {
 
-      $self                  = new self();
-      $input["users_id"]     = $users_id;
+      $self                                  = new self();
+      $input["users_id"]                     = $users_id;
+      $input["Tickets_to_be_processed"]      = 1;
+      $input["Ticket_tasks_to_be_addressed"] = 1;
+      $input["Pending_tickets"]              = 1;
+      $input["Current_tickets"]              = 1;
+      $input["Observed_tickets"]             = 1;
       return $self->add($input);
    }
 
@@ -108,6 +113,31 @@ class PluginMycustomviewPreference extends CommonDBTM {
                                                             'width'    => 200,
                                                             'values'   => json_decode($self->fields["groups_id"], true)]);
       }
+      echo "</td></tr>";
+
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets à traiter', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("Tickets_to_be_processed", $self->fields["Tickets_to_be_processed"]);
+      echo "</td></tr>";
+
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tâches de tickets à traiter', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("Ticket_tasks_to_be_addressed", $self->fields["Ticket_tasks_to_be_addressed"]);
+      echo "</td></tr>";
+
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets en attente', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("Pending_tickets", $self->fields["Pending_tickets"]);
+      echo "</td></tr>";
+
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets en cours', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("Current_tickets", $self->fields["Current_tickets"]);
+      echo "</td></tr>";
+
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets observés', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("Observed_tickets", $self->fields["Observed_tickets"]);
       echo "</td></tr>";
 
       echo "<tr class='tab_bg_1 center'><td colspan='2'>";
