@@ -144,7 +144,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     }
                     $tableau_nbr ++;
 
-                    echo '<div class="card">';
+                    echo '<div class="card" id="testtable">';
                     echo '<div class="card-body p-0">';
         
                     $options['criteria'] = [
@@ -291,6 +291,20 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                     echo '</div>';
+
+                    ?>
+                        <script>
+                            // Supposons que l'ID de votre tableau soit "monTableau"
+                            var tableau = document.getElementById("testtable");
+
+                            // Obtenir la largeur et la hauteur en pixels
+                            var largeur = tableau.offsetWidth;
+                            var hauteur = tableau.offsetHeight;
+
+                            console.log("Largeur : " + largeur + "px, Hauteur : " + hauteur + "px");
+
+                        </script>
+                    <?php
                 }
             // _____________________________ TABLEAU 1 _____________________________
 
