@@ -108,9 +108,9 @@ class PluginMycustomviewMyview extends CommonDBTM
         $taille_space = 0;
         $tableau_space = [];
         ?><script>
-            var card = [];
-            var card_pair = [];
-            var card_impair = [];
+            const card = [];
+            const card_pair = [];
+            const card_impair = [];
         </script><?php
 
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
@@ -1072,28 +1072,8 @@ class PluginMycustomviewMyview extends CommonDBTM
             for (let i = 0; i < card_impair.length; i++) {
                 sum2 += card_impair[i];
             }
-
-            
-            console.log(sum); // Affiche 10
-            console.log(sum2); // Affiche 10
-            document.getElementById("tableau").style.height = sum+'px';
+            var MaxSum = Math.max(sum, sum2);
+            document.getElementById("tableau").style.height = MaxSum+'px';
         </script><?php
-
-/*?><script>
-// Supposons que l'ID de votre tableau soit "monTableau"
-var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
-var tableau = document.getElementById("table_card_"+tableau_nbr);
-// Obtenir la hauteur en pixels
-var hauteur = tableau.offsetHeight;
-card.push(hauteur);
-
-if (tableau_nbr > 1 && tableau_nbr < 4) {
-    var margin_top = card[tableau_nbr-2] + 15;
-}else if (tableau_nbr >= 4){
-    var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
-}
-
-document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
-</script><?php*/
     }
 }
