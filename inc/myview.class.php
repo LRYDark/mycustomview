@@ -107,12 +107,15 @@ class PluginMycustomviewMyview extends CommonDBTM
         $tableau_nbr = 0;
         $taille_space = 0;
         $tableau_space = [];
+        ?><script>
+            var card = [];
+        </script><?php
 
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 600px;">';
         
-            // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
+        // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -129,22 +132,33 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
                 if ($displayed_row_count > 0 && $pref->Tickets_to_be_processed != 0) {
-                    array_push( $tableau_space, $total_row_count);
-
-                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
-                    }elseif ($tableau_nbr >= 4){
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
-                    }
-
+                   
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     }
+
+                    ?><script>
+                        // Supposons que l'ID de votre tableau soit "monTableau"
+                        var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        // Obtenir la hauteur en pixels
+                        var hauteur = tableau.offsetHeight;
+                        card.push(hauteur);
+
+                        if (tableau_nbr > 1 && tableau_nbr < 4) {
+                            var margin_top = card[tableau_nbr-2] + 15;
+                        }else if (tableau_nbr >= 4){
+                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                        }
+
+                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                    </script><?php
+
                     $tableau_nbr ++;
 
-                    echo '<div class="card" id="testtable">';
+                    echo '<div class="card">';
                     echo '<div class="card-body p-0">';
         
                     $options['criteria'] = [
@@ -291,25 +305,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                     echo '</div>';
-
-                    ?>
-                        <script>
-                            // Supposons que l'ID de votre tableau soit "monTableau"
-                            var tableau = document.getElementById("testtable");
-
-                            // Obtenir la largeur et la hauteur en pixels
-                            var largeur = tableau.offsetWidth;
-                            var hauteur = tableau.offsetHeight;
-
-                            console.log("Largeur : " + largeur + "px, Hauteur : " + hauteur + "px");
-
-                        </script>
-                    <?php
                 }
             // _____________________________ TABLEAU 1 _____________________________
 
             //******************************************************************* */
-            // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS 'requestbyself'
+        // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS 'requestbyself'
                 //***************************************************REQUETE */
                 $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -325,19 +325,30 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
                 if ($displayed_row_count2 > 0 && $pref->Current_tickets != 0) {
-                    array_push($tableau_space, $total_row_count2);
-                    
-                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
-                    }elseif ($tableau_nbr >= 4){
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
-                    }
                     
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     }
+
+                    ?><script>
+                        // Supposons que l'ID de votre tableau soit "monTableau"
+                        var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        // Obtenir la hauteur en pixels
+                        var hauteur = tableau.offsetHeight;
+                        card.push(hauteur);
+
+                        if (tableau_nbr > 1 && tableau_nbr < 4) {
+                            var margin_top = card[tableau_nbr-2] + 15;
+                        }else if (tableau_nbr >= 4){
+                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                        }
+
+                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                    </script><?php
+
                     $tableau_nbr ++;
 
                     echo '<div class="card">';
@@ -475,7 +486,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             // _____________________________ TABLEAU 2 _____________________________
 
             //******************************************************************* */
-            // _____________________________ TABLEAU 3 _____________________________ TICKET EN ATTENTE 'waiting'
+        // _____________________________ TABLEAU 3 _____________________________ TICKET EN ATTENTE 'waiting'
                 //***************************************************REQUETE */
                 $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -492,19 +503,30 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
 
                 if ($displayed_row_count3 > 0 && $pref->Pending_tickets != 0) {
-                    array_push( $tableau_space, $total_row_count3);
-
-                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
-                    }elseif ($tableau_nbr >= 4){
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
-                    }
-                    
+                                    
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     }
+
+                    ?><script>
+                        // Supposons que l'ID de votre tableau soit "monTableau"
+                        var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        // Obtenir la hauteur en pixels
+                        var hauteur = tableau.offsetHeight;
+                        card.push(hauteur);
+
+                        if (tableau_nbr > 1 && tableau_nbr < 4) {
+                            var margin_top = card[tableau_nbr-2] + 15;
+                        }else if (tableau_nbr >= 4){
+                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                        }
+
+                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                    </script><?php
+
                     $tableau_nbr ++;
 
                     echo '<div class="card">';
@@ -642,7 +664,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             // _____________________________ TABLEAU 3 _____________________________
 
             //******************************************************************* */
-            // _____________________________ TABLEAU 4 _____________________________ VOS TICKETS OBSERVES 'observed'
+        // _____________________________ TABLEAU 4 _____________________________ VOS TICKETS OBSERVES 'observed'
                 //***************************************************REQUETE */
                 $status_ticket_incoming     = Ticket::INCOMING;
                 $status_ticket_planned      = Ticket::PLANNED;
@@ -663,19 +685,30 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count4 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count4);
 
                 if ($displayed_row_count4 > 0 && $pref->Observed_tickets != 0) {
-                    array_push($tableau_space, $total_row_count4);
-                    
-                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
-                    }elseif ($tableau_nbr >= 4){
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
-                    }
-                    
+    
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     }
+
+                    ?><script>
+                        // Supposons que l'ID de votre tableau soit "monTableau"
+                        var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        // Obtenir la hauteur en pixels
+                        var hauteur = tableau.offsetHeight;
+                        card.push(hauteur);
+
+                        if (tableau_nbr > 1 && tableau_nbr < 4) {
+                            var margin_top = card[tableau_nbr-2] + 15;
+                        }else if (tableau_nbr >= 4){
+                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                        }
+
+                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                    </script><?php
+
                     $tableau_nbr ++;
                     
                     echo '<div class="card">';
@@ -813,7 +846,7 @@ class PluginMycustomviewMyview extends CommonDBTM
             // _____________________________ TABLEAU 4 _____________________________
                         
             //******************************************************************* */
-            // _____________________________ TABLEAU 10 _____________________________ VOS TACHES DE TICKET A TRAITER 
+        // _____________________________ TABLEAU 10 _____________________________ VOS TACHES DE TICKET A TRAITER 
                 //***************************************************REQUETE
                 $criteria10 ="	SELECT *, glpi_tickettasks.content AS task_content FROM glpi_tickets 
                                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -831,19 +864,30 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
                 if ($displayed_row_count10 > 0 && $pref->Ticket_tasks_to_be_addressed != 0) {
-                    array_push($tableau_space, $total_row_count10);
-
-                    if ($tableau_nbr > 1 && $tableau_nbr < 4) {
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]);
-                    }elseif ($tableau_nbr >= 4){
-                        $taille_space = 85 + (38*$tableau_space[$tableau_nbr-2]) + 85 + (38*$tableau_space[$tableau_nbr-4]);
-                    }
 
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: '.$taille_space.'px;">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
                     }
+
+                    ?><script>
+                        // Supposons que l'ID de votre tableau soit "monTableau"
+                        var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        // Obtenir la hauteur en pixels
+                        var hauteur = tableau.offsetHeight;
+                        card.push(hauteur);
+
+                        if (tableau_nbr > 1 && tableau_nbr < 4) {
+                            var margin_top = card[tableau_nbr-2] + 15;
+                        }else if (tableau_nbr >= 4){
+                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                        }
+
+                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                    </script><?php
+
                     $tableau_nbr ++;
 
                     echo '<div class="card">';
