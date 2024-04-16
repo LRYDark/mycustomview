@@ -117,7 +117,7 @@ class PluginMycustomviewMyview extends CommonDBTM
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 0px;" id="tableau">';
         
-        // _____________________________ TABLEAU 1 _____________________________ TICKETS À TRAITER 'process'
+        // _____________________________ TABLEAU 0 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -314,10 +314,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                 }
-            // _____________________________ TABLEAU 1 _____________________________
+            // _____________________________ TABLEAU 0 _____________________________
 
             //******************************************************************* */
-        // _____________________________ TABLEAU 2 _____________________________ VOS TICKETS EN COURS 'requestbyself'
+        // _____________________________ TABLEAU 1 _____________________________ VOS TICKETS EN COURS 'requestbyself'
                 //***************************************************REQUETE */
                 $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -497,10 +497,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                 }
-            // _____________________________ TABLEAU 2 _____________________________
+            // _____________________________ TABLEAU 1 _____________________________
 
             //******************************************************************* */
-        // _____________________________ TABLEAU 3 _____________________________ TICKET EN ATTENTE 'waiting'
+        // _____________________________ TABLEAU 2 _____________________________ TICKET EN ATTENTE 'waiting'
                 //***************************************************REQUETE */
                 $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -681,10 +681,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                 }
-            // _____________________________ TABLEAU 3 _____________________________
+            // _____________________________ TABLEAU 2 _____________________________
 
             //******************************************************************* */
-        // _____________________________ TABLEAU 4 _____________________________ VOS TICKETS OBSERVES 'observed'
+        // _____________________________ TABLEAU 3 _____________________________ VOS TICKETS OBSERVES 'observed'
                 //***************************************************REQUETE */
                 $status_ticket_incoming     = Ticket::INCOMING;
                 $status_ticket_planned      = Ticket::PLANNED;
@@ -869,10 +869,10 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                 }
-            // _____________________________ TABLEAU 4 _____________________________
+            // _____________________________ TABLEAU 3 _____________________________
                         
             //******************************************************************* */
-        // _____________________________ TABLEAU 10 _____________________________ VOS TACHES DE TICKET A TRAITER 
+        // _____________________________ TABLEAU 4 _____________________________ VOS TACHES DE TICKET A TRAITER 
                 //***************************************************REQUETE
                 $criteria10 ="	SELECT *, glpi_tickettasks.content AS task_content FROM glpi_tickets 
                                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
@@ -1060,7 +1060,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                     echo '</div>';
                 }
-            // _____________________________ TABLEAU 10 _____________________________
+            // _____________________________ TABLEAU 4 _____________________________
         echo '</div>';
 
         ?><script>
