@@ -219,11 +219,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         ],
                         [
                             'content'   => _n('Date de création', 'Date de création', 1),
-                            'style'     => 'width: 15%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Date de modification', 'Date de modification', 1),
-                            'style'     => 'width: 18%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -402,11 +402,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         ],
                         [
                             'content'   => _n('Date de création', 'Date de création', 1),
-                            'style'     => 'width: 15%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Date de modification', 'Date de modification', 1),
-                            'style'     => 'width: 18%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -586,11 +586,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         ],
                         [
                             'content'   => _n('Date de création', 'Date de création', 1),
-                            'style'     => 'width: 15%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Date de modification', 'Date de modification', 1),
-                            'style'     => 'width: 18%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
@@ -774,11 +774,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         ],
                         [
                             'content'   => _n('Date de création', 'Date de création', 1),
-                            'style'     => 'width: 15%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Date de modification', 'Date de modification', 1),
-                            'style'     => 'width: 18%',
+                            'style'     => 'width: 14%',
                         ],
                         [
                             'content'   => _n('Entity', 'Entity', 1),
