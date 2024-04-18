@@ -111,10 +111,10 @@ class PluginMycustomviewMyview extends CommonDBTM
         $tableau_space = [];
 
         ?><script>
-            const rand = <?php echo json_encode($rand) ?>;
-            const card = [];
-            const card_pair = [];
-            const card_impair = [];
+            var rand = <?php echo json_encode($rand) ?>;
+            var card = [];
+            var card_pair = [];
+            var card_impair = [];
         </script><?php
 
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
@@ -915,6 +915,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                         // Obtenir la hauteur en pixels
                         var hauteur = tableau.offsetHeight;
                         card.push(hauteur);
+
 
                         if (tableau_nbr % 2 == 0) {
                             card_pair.push(hauteur);
