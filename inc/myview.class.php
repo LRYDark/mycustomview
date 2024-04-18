@@ -117,7 +117,7 @@ class PluginMycustomviewMyview extends CommonDBTM
 
         $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
-        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 0px;" id="tableau">';
+        echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 0px;" id="tableau_'.$rand.'">';
         
         // _____________________________ TABLEAU 0 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
@@ -1078,13 +1078,15 @@ class PluginMycustomviewMyview extends CommonDBTM
             var sum = 0;
             for (var i = 0; i < card_pair.length; i++) {
                 sum += card_pair[i];
+                console.log(card_pair[i]);
             }
             var sum2 = 0;
             for (var i = 0; i < card_impair.length; i++) {
                 sum2 += card_impair[i];
+                console.log(card_impair[i]);
             }
             var MaxSum = Math.max(sum, sum2);
-            document.getElementById("tableau").style.height = MaxSum+'px';
+            document.getElementById("tableau_"+rand).style.height = MaxSum+'px';
         </script><?php
     }
 }
