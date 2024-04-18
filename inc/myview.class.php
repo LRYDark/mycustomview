@@ -104,10 +104,14 @@ class PluginMycustomviewMyview extends CommonDBTM
         $user_id = session::getLoginUserID();
         $pref = $DB->query("SELECT * FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
 
+        $rand = rand();
         $tableau_nbr = 0;
+        $tableau_nbr_rand = $rand.'_'.$tableau_nbr;
         $taille_space = 0;
         $tableau_space = [];
+
         ?><script>
+            const rand = <?php echo json_encode($rand) ?>;
             const card = [];
             const card_pair = [];
             const card_impair = [];
@@ -136,15 +140,16 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count > 0 && $pref->Tickets_to_be_processed != 0) {
                    
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     }
 
                     ?><script>
                         // Supposons que l'ID de votre tableau soit "monTableau"
                         var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
-                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        var tableau_nbr_rand = <?php echo json_encode($tableau_nbr_rand) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr_rand);
                         // Obtenir la hauteur en pixels
                         var hauteur = tableau.offsetHeight;
                         card.push(hauteur);
@@ -161,10 +166,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                             var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
                         }
 
-                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
+                    $tableau_nbr_rand ++;
 
                     echo '<div class="card">';
                     echo '<div class="card-body p-0">';
@@ -519,15 +525,16 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count3 > 0 && $pref->Pending_tickets != 0) {
                                     
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     }
 
                     ?><script>
                         // Supposons que l'ID de votre tableau soit "monTableau"
                         var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
-                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        var tableau_nbr_rand = <?php echo json_encode($tableau_nbr_rand) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr_rand);
                         // Obtenir la hauteur en pixels
                         var hauteur = tableau.offsetHeight;
                         card.push(hauteur);
@@ -544,10 +551,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                             var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
                         }
 
-                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
+                    $tableau_nbr_rand ++;
 
                     echo '<div class="card">';
                     echo '<div class="card-body p-0">';
@@ -707,15 +715,16 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count4 > 0 && $pref->Observed_tickets != 0) {
     
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     }
 
                     ?><script>
                         // Supposons que l'ID de votre tableau soit "monTableau"
                         var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
-                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        var tableau_nbr_rand = <?php echo json_encode($tableau_nbr_rand) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr_rand);
                         // Obtenir la hauteur en pixels
                         var hauteur = tableau.offsetHeight;
                         card.push(hauteur);
@@ -732,10 +741,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                             var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
                         }
 
-                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
+                    $tableau_nbr_rand ++;
                     
                     echo '<div class="card">';
                     echo '<div class="card-body p-0">';
@@ -892,15 +902,16 @@ class PluginMycustomviewMyview extends CommonDBTM
                 if ($displayed_row_count10 > 0 && $pref->Ticket_tasks_to_be_addressed != 0) {
 
                     if ($tableau_nbr % 2 == 0) {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 0%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     } else {
-                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr.'">';
+                        echo '<div class="grid-item col-xl-6" style="position: absolute; left: 50%; top: 0px;" id="table_card_'.$tableau_nbr_rand.'">';
                     }
 
                     ?><script>
                         // Supposons que l'ID de votre tableau soit "monTableau"
                         var tableau_nbr = <?php echo json_encode($tableau_nbr) ?>;
-                        var tableau = document.getElementById("table_card_"+tableau_nbr);
+                        var tableau_nbr_rand = <?php echo json_encode($tableau_nbr_rand) ?>;
+                        var tableau = document.getElementById("table_card_"+tableau_nbr_rand);
                         // Obtenir la hauteur en pixels
                         var hauteur = tableau.offsetHeight;
                         card.push(hauteur);
@@ -917,10 +928,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                             var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
                         }
 
-                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
+                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
+                    $tableau_nbr_rand ++;
 
                     echo '<div class="card">';
                     echo '<div class="card-body p-0">';
