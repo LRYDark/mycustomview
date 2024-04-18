@@ -107,8 +107,6 @@ class PluginMycustomviewMyview extends CommonDBTM
         $rand = rand();
         $tableau_nbr = 0;
         $tableau_nbr_rand = $rand.'_'.$tableau_nbr;
-        $taille_space = 0;
-        $tableau_space = [];
 
         ?><script>
             var rand = <?php echo json_encode($rand) ?>;
@@ -161,12 +159,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                         }
 
                         if (tableau_nbr > 1 && tableau_nbr < 4) {
-                            var margin_top = card[tableau_nbr-2] + 15;
+                            var margin_top1 = card[tableau_nbr-2] + 15;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top1+'px';
                         }else if (tableau_nbr >= 4){
-                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            var margin_top2 = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top2+'px';
                         }
-
-                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
@@ -361,12 +359,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                         }
 
                         if (tableau_nbr > 1 && tableau_nbr < 4) {
-                            var margin_top = card[tableau_nbr-2] + 15;
+                            var margin_top1 = card[tableau_nbr-2] + 15;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top1+'px';
                         }else if (tableau_nbr >= 4){
-                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            var margin_top2 = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top2+'px';
                         }
-
-                        document.getElementById("table_card_"+tableau_nbr).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
@@ -546,12 +544,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                         }
 
                         if (tableau_nbr > 1 && tableau_nbr < 4) {
-                            var margin_top = card[tableau_nbr-2] + 15;
+                            var margin_top1 = card[tableau_nbr-2] + 15;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top1+'px';
                         }else if (tableau_nbr >= 4){
-                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            var margin_top2 = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top2+'px';
                         }
-
-                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
@@ -736,12 +734,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                         }
 
                         if (tableau_nbr > 1 && tableau_nbr < 4) {
-                            var margin_top = card[tableau_nbr-2] + 15;
+                            var margin_top1 = card[tableau_nbr-2] + 15;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top1+'px';
                         }else if (tableau_nbr >= 4){
-                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            var margin_top2 = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top2+'px';
                         }
-
-                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
@@ -924,12 +922,12 @@ class PluginMycustomviewMyview extends CommonDBTM
                         }
 
                         if (tableau_nbr > 1 && tableau_nbr < 4) {
-                            var margin_top = card[tableau_nbr-2] + 15;
+                            var margin_top1 = card[tableau_nbr-2] + 15;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top1+'px';
                         }else if (tableau_nbr >= 4){
-                            var margin_top = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            var margin_top2 = card[tableau_nbr-2] + card[tableau_nbr-4] + 30;
+                            document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top2+'px';
                         }
-
-                        document.getElementById("table_card_"+tableau_nbr_rand).style.top = margin_top+'px';
                     </script><?php
 
                     $tableau_nbr ++;
@@ -1077,12 +1075,12 @@ class PluginMycustomviewMyview extends CommonDBTM
         echo '</div>';
 
         ?><script>
-            let sum = 0;
-            for (let i = 0; i < card_pair.length; i++) {
+            var sum = 0;
+            for (var i = 0; i < card_pair.length; i++) {
                 sum += card_pair[i];
             }
-            let sum2 = 0;
-            for (let i = 0; i < card_impair.length; i++) {
+            var sum2 = 0;
+            for (var i = 0; i < card_impair.length; i++) {
                 sum2 += card_impair[i];
             }
             var MaxSum = Math.max(sum, sum2);
