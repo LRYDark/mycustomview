@@ -26,7 +26,7 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.1');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.2');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));

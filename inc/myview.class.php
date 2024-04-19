@@ -1072,6 +1072,13 @@ class PluginMycustomviewMyview extends CommonDBTM
                     echo '</div>';
                 }
             // _____________________________ TABLEAU 4 _____________________________
+        
+        if($tableau_nbr == 0){
+            echo "<div style='padding: 50px;'>";
+                echo "<div class='alert alert-success d-flex'>";
+                    echo "<b>" . __("Aucun ticket disponible pour ce groupe.") . "</b></div>";
+            echo '</div>';
+        }
         echo '</div>';
 
         ?><script>
