@@ -37,7 +37,7 @@ class PluginMycustomviewProfile extends Profile
     static function getAllRights() {
         $rights = [
             ['itemtype'  => 'PluginMyCustomViewUse',
-                  'label'     => __('Affchage (Modification et Lecture)', 'mycustomview'),
+                  'label'     => __('Affichage (Modification et Lecture)', 'mycustomview'),
                   'field'     => 'plugin_mycustomview_use',
                   'rights'    => [ALLSTANDARDRIGHT => __('Read')]]];
           return $rights;

@@ -45,7 +45,7 @@ class PluginMycustomviewMyview extends CommonDBTM
       if ($item->getType() == 'Central') {
 
         $group   = new PluginMycustomviewPreference();
-        $result  = $group->find();
+        $result  = $group->find(['users_id' => Session::getLoginUserID()]);
         $tabs = [];
   
         $i = 0;
@@ -75,7 +75,7 @@ class PluginMycustomviewMyview extends CommonDBTM
 
       if ($item->getType() == 'Central') {
         $group   = new PluginMycustomviewPreference();
-        $result  = $group->find();
+        $result  = $group->find(['users_id' => Session::getLoginUserID()]);
         $i = 0;
         foreach ($result as $data) {
             $groups_id = $data['groups_id'];

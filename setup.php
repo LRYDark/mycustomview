@@ -46,7 +46,7 @@ function plugin_init_mycustomview()
    global $PLUGIN_HOOKS, $DB;
    Plugin::registerClass('PluginMycustomviewProfile', ['addtabon' => 'Profile']);
 
-   if(Session::haveRight("plugin_rp_rapport_tech", READ)){
+   if(Session::haveRight("plugin_mycustomview_use", READ)){
       Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
       Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
 
