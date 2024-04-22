@@ -50,19 +50,22 @@ class PluginMycustomviewMyview extends CommonDBTM
   
         $i = 0;
         foreach ($result as $data) {
-           $groups_id = $data['groups_id'];
-           if(!empty($groups_id)){
+            $groups_id = $data['groups_id'];
+            if(!empty($groups_id)){
                 $group_id = json_decode($groups_id);
                 foreach ($group_id as $data) {
-                $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
-                if(!empty($result->comment)){
-                    array_push($tabs, __($result->comment, "mycustomview"));
-                    }elseif(!empty($result->name)){
-                    array_push($tabs, __($result->name, "mycustomview"));
-                    }
-                $i++;
+                    $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
+
+                    $user_id = session::getLoginUserID();
+                    $full_view = $DB->query("SELECT full_view FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
+                    if(!empty($result->comment) && $full_view->full_view == 1){
+                            array_push($tabs, __($result->comment, "mycustomview"));
+                        }elseif(!empty($result->name)){
+                            array_push($tabs, __($result->name, "mycustomview"));
+                        }
+                    $i++;
                 }
-           }
+            }
         }
         return $tabs;
       }

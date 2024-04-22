@@ -58,6 +58,7 @@ class PluginMycustomviewPreference extends CommonDBTM {
       $input["Pending_tickets"]              = 1;
       $input["Current_tickets"]              = 1;
       $input["Observed_tickets"]             = 1;
+      $input["full_view"]                    = 0;
       return $self->add($input);
    }
 
@@ -132,6 +133,7 @@ class PluginMycustomviewPreference extends CommonDBTM {
       echo "<tr class='tab_bg_1 center'><td colspan='2'>
       <span style=\"font-weight:bold; color:red\">" . __("Votre administrateur a limité l'affichage des groupes à : ". $var, 'rp') . "</td></span></tr>";
 
+      echo " <tr><th colspan='2'>" .__("Paramètre d'affichage des tableaux sur les vues groupées", "mycustomview") . ".</th></tr>\n";
       echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets à traiter', 'rp') . "</td>";
       echo "<td>";
       Dropdown::showYesNo("Tickets_to_be_processed", $self->fields["Tickets_to_be_processed"]);
@@ -155,6 +157,12 @@ class PluginMycustomviewPreference extends CommonDBTM {
       echo "<tr class='tab_bg_1 top'><td>" . __('Affichage des Tickets observés', 'rp') . "</td>";
       echo "<td>";
       Dropdown::showYesNo("Observed_tickets", $self->fields["Observed_tickets"]);
+      echo "</td></tr>";
+
+      echo " <tr><th colspan='2'>" .__("Paramètre d'affichage des titres des groupes", "mycustomview") . ".</th></tr>\n";
+      echo "<tr class='tab_bg_1 top'><td>" . __('Affichage complet des titres', 'rp') . "</td>";
+      echo "<td>";
+      Dropdown::showYesNo("full_view", $self->fields["full_view"]);
       echo "</td></tr>";
 
       echo "<tr class='tab_bg_1 center'><td colspan='2'>";

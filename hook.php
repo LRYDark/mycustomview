@@ -38,8 +38,7 @@ function plugin_mycustomview_install()
 
    // ------- On include les classes importantes
    include_once(GLPI_ROOT . "/plugins/mycustomview/inc/profile.class.php");
-   //include_once(GLPI_ROOT . "/plugins/mycustomview/inc/config.class.php");
-
+ 
    PluginMycustomviewProfile::createFirstAccess($_SESSION["glpiactiveprofile"]["id"]);
 
    // requete de création des tables
@@ -75,6 +74,11 @@ function plugin_mycustomview_install()
             'max_filters' => 4
          ]
       );
+   }
+
+   if (!$DB->fieldExists("glpi_plugin_mycustomview_preferences", "full_view")) {      
+      $query = "ALTER TABLE glpi_plugin_mycustomview_preferences ADD full_view INT NULL;";
+      $DB->query($query);
    }
 
    return true;
