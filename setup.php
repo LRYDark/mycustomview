@@ -26,7 +26,7 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.2');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.3');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));
@@ -44,12 +44,13 @@ if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
 function plugin_init_mycustomview()
 {
    global $PLUGIN_HOOKS, $DB;
-
    Plugin::registerClass('PluginMycustomviewProfile', ['addtabon' => 'Profile']);
 
-   Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
+   if(Session::haveRight("plugin_rp_rapport_tech", READ)){
+      Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
+      Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
 
-   Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
+   }
 
    $PLUGIN_HOOKS['csrf_compliant']['mycustomview'] = true;
    // -- PAGE DE CONFIGURATION -- 
