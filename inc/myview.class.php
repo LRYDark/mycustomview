@@ -111,6 +111,11 @@ class PluginMycustomviewMyview extends CommonDBTM
         $tableau_nbr = 0;
         $tableau_nbr_rand = $rand.'_'.$tableau_nbr;
 
+        $status_ticket_incoming     = Ticket::INCOMING;     //1
+        $status_ticket_assigned     = Ticket::ASSIGNED;     //2
+        $status_ticket_planned      = Ticket::PLANNED;      //3
+        $status_ticket_waiting      = Ticket::WAITING;      //4
+
         ?><script>
             var rand = <?php echo json_encode($rand) ?>;
             var card = [];
@@ -127,7 +132,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
-                                    AND glpi_tickets.status IN ('1', '2')
+                                    AND glpi_tickets.status IN ('$status_ticket_incoming', '$status_ticket_planned' , '$status_ticket_assigned')
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 2
                                     ORDER BY glpi_tickets.date_mod DESC;";
@@ -291,15 +296,14 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $ticket_name = $data['name'];
                             $ticket_content = $data['content'];
                             
-                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
-                            $link .= "'>";
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id) . "'>";
                             $link = sprintf(
                                 __('%1$s %2$s'),
                                 $link,
                                 Html::showToolTip(
                                     Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
                                     ['applyto' => 'ticket' . $ticket_id,
-                                        'display' => false
+                                        'display' => true
                                     ]
                                 )
                             );
@@ -474,15 +478,14 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $ticket_name = $data['name'];
                             $ticket_content = $data['content'];
                             
-                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
-                            $link .= "'>";
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id) . "'>";
                             $link = sprintf(
                                 __('%1$s %2$s'),
                                 $link,
                                 Html::showToolTip(
                                     Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
                                     ['applyto' => 'ticket' . $ticket_id,
-                                        'display' => false
+                                        'display' => true
                                     ]
                                 )
                             );
@@ -512,7 +515,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
-                                    AND glpi_tickets.status = 4
+                                    AND glpi_tickets.status = $status_ticket_waiting
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 2
                                     ORDER BY glpi_tickets.date_mod DESC;";
@@ -660,15 +663,14 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $ticket_name = $data['name'];
                             $ticket_content = $data['content'];
                             
-                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
-                            $link .= "'>";
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id) . "'>";
                             $link = sprintf(
                                 __('%1$s %2$s'),
                                 $link,
                                 Html::showToolTip(
                                     Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
                                     ['applyto' => 'ticket' . $ticket_id,
-                                        'display' => false
+                                        'display' => true
                                     ]
                                 )
                             );
@@ -695,10 +697,6 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
         // _____________________________ TABLEAU 3 _____________________________ VOS TICKETS OBSERVES 'observed'
                 //***************************************************REQUETE */
-                $status_ticket_incoming     = Ticket::INCOMING;
-                $status_ticket_planned      = Ticket::PLANNED;
-                $status_ticket_assigned     = Ticket::ASSIGNED;
-                $status_ticket_waiting      = Ticket::WAITING;
                 $criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
@@ -850,15 +848,14 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $ticket_name = $data['name'];
                             $ticket_content = $data['content'];
                             
-                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id);
-                            $link .= "'>";
+                            $link = "<a id='ticket" . $ticket_id . "' href='" . Ticket::getFormURLWithID($ticket_id) . "'>";
                             $link = sprintf(
                                 __('%1$s %2$s'),
                                 $link,
                                 Html::showToolTip(
                                     Glpi\RichText\RichText::getEnhancedHtml($ticket_content),
                                     ['applyto' => 'ticket' . $ticket_id,
-                                        'display' => false
+                                        'display' => true
                                     ]
                                 )
                             );
