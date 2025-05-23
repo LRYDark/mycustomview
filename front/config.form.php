@@ -38,14 +38,11 @@ if ($_SESSION["glpiactiveprofile"]["interface"] == "central") {
 
    $config = new PluginMycustomviewConfig();
 
-   if($max_filters = $config->getMaxFilters()) {
+   if ($max_filters = $config->getMaxFilters()) {
       $config->showForm($max_filters);
-   }
-   else 
-   {
+   } else {
       $config->showForm();
    }
    Html::closeForm();
    
-
 Html::footer();

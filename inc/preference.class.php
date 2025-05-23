@@ -40,7 +40,7 @@ class PluginMycustomviewPreference extends CommonDBTM {
    static function checkIfPreferenceExists($users_id) {
       global $DB;
 
-      $result = $DB->query("SELECT `id`
+      $result = $DB->doQuery("SELECT `id`
                 FROM `glpi_plugin_mycustomview_preferences`
                 WHERE `users_id` = '" . $users_id . "' ");
       if ($DB->numrows($result) > 0)
@@ -106,7 +106,7 @@ class PluginMycustomviewPreference extends CommonDBTM {
          $groups[$data['id']] = $data['name'];
       }
 
-      $var = $DB->query("SELECT * FROM glpi_plugin_mycustomview_config WHERE id = 1")->fetch_object();
+      $var = $DB->doQuery("SELECT * FROM glpi_plugin_mycustomview_config WHERE id = 1")->fetch_object();
       $var = $var->max_filters;
       ?><script>
          var jsvar = '<?=$var?>';

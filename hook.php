@@ -34,6 +34,7 @@
 function plugin_mycustomview_install()
 {
 
+   /** @var DBmysql $DB */
    global $DB;
 
    // ------- On include les classes importantes
@@ -56,7 +57,7 @@ function plugin_mycustomview_install()
          KEY `users_id` (`users_id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";
 
-      $DB->query($query) or die("error creating glpi_plugin_mycustomview_preferences " . $DB->error());
+      $DB->doQuery($query) or die("error creating glpi_plugin_mycustomview_preferences " . $DB->error());
    }
 
    if (!$DB->TableExists("glpi_plugin_mycustomview_config")) {
@@ -66,7 +67,7 @@ function plugin_mycustomview_install()
          PRIMARY KEY  (`id`)
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-      $DB->query($query) or die("error creating glpi_plugin_mycustomview_config " . $DB->error());
+      $DB->doQuery($query) or die("error creating glpi_plugin_mycustomview_config " . $DB->error());
 
       $DB->insert(
          'glpi_plugin_mycustomview_config',
@@ -78,7 +79,7 @@ function plugin_mycustomview_install()
 
    if (!$DB->fieldExists("glpi_plugin_mycustomview_preferences", "full_view")) {      
       $query = "ALTER TABLE glpi_plugin_mycustomview_preferences ADD full_view INT NULL;";
-      $DB->query($query);
+      $DB->doQuery($query);
    }
 
    return true;
@@ -93,10 +94,13 @@ function plugin_mycustomview_uninstall()
 {
    global $DB;
 
-   $tables = array("glpi_plugin_mycustomview_preferences");
+   $tables = array(
+      "glpi_plugin_mycustomview_preferences",
+      "glpi_plugin_mycustomview_config"
+   );
 
    foreach ($tables as $table) {
-      $DB->query("DROP TABLE IF EXISTS `$table`;");
+      $DB->doQuery("DROP TABLE IF EXISTS `$table`;");
    }
 
    global $DB;

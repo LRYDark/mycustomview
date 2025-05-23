@@ -54,10 +54,10 @@ class PluginMycustomviewMyview extends CommonDBTM
             if(!empty($groups_id)){
                 $group_id = json_decode($groups_id);
                 foreach ($group_id as $data) {
-                    $result = $DB->query("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
+                    $result = $DB->doQuery("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
 
                     $user_id = session::getLoginUserID();
-                    $full_view = $DB->query("SELECT full_view FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
+                    $full_view = $DB->doQuery("SELECT full_view FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
                     if(!empty($result->comment) && $full_view->full_view == 1){
                             array_push($tabs, __($result->comment, "mycustomview"));
                         }elseif(!empty($result->name)){
@@ -105,7 +105,7 @@ class PluginMycustomviewMyview extends CommonDBTM
         global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
 
         $user_id = session::getLoginUserID();
-        $pref = $DB->query("SELECT * FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
+        $pref = $DB->doQuery("SELECT * FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
 
         $rand = rand();
         $tableau_nbr = 0;
@@ -123,23 +123,52 @@ class PluginMycustomviewMyview extends CommonDBTM
             var card_impair = [];
         </script><?php
 
-        $glpi_config = $DB->query("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
+        $glpi_config = $DB->doQuery("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 0px;" id="tableau_'.$rand.'">';
         
         // _____________________________ TABLEAU 0 _____________________________ TICKETS À TRAITER 'process'
                 //***************************************************REQUETE */
-                $criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
+                /*$criteria ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status IN ('$status_ticket_incoming', '$status_ticket_planned' , '$status_ticket_assigned')
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 2
-                                    ORDER BY glpi_tickets.date_mod DESC;";
+                                    ORDER BY glpi_tickets.date_mod DESC;";*/
                 //***************************************************REQUETE */
 
                 // Variables (requete)
-                $iterator = $DB->request($criteria);
+                //$iterator = $DB->request($criteria);
+
+                $iterator = $DB->request([
+                    'SELECT' => [
+                        'glpi_tickets.id',
+                        'glpi_tickets.name',
+                        'glpi_tickets.content',
+                        'glpi_tickets.entities_id',
+                        'glpi_tickets.priority',
+                        'glpi_tickets.date_creation',
+                        'glpi_tickets.date_mod'
+                    ],
+                    'FROM'   => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE'  => [
+                        'glpi_groups_tickets.groups_id'      => $id_group,
+                        'glpi_groups_tickets.type'           => 2,
+                        'glpi_tickets.is_deleted'            => 0,
+                        'glpi_tickets.status'                => ['IN', [$status_ticket_incoming, $status_ticket_planned, $status_ticket_assigned]]
+                    ],
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                ]);
+
                 $total_row_count = count($iterator);
                 $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
 
@@ -281,7 +310,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
-                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
                                 $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
@@ -330,16 +359,43 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
         // _____________________________ TABLEAU 1 _____________________________ VOS TICKETS EN COURS 'requestbyself'
                 //***************************************************REQUETE */
-                $criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
+                /*$criteria2 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 1
-                                    ORDER BY glpi_tickets.date_mod DESC;";
+                                    ORDER BY glpi_tickets.date_mod DESC;";*/
                 //***************************************************REQUETE */
 
                 // Variables (requete)
-                $iterator2 = $DB->request($criteria2);
+                //$iterator2 = $DB->request($criteria2);
+                $iterator2 = $DB->request([
+                    'SELECT' => [
+                        'glpi_tickets.id',
+                        'glpi_tickets.name',
+                        'glpi_tickets.content',
+                        'glpi_tickets.entities_id',
+                        'glpi_tickets.priority',
+                        'glpi_tickets.date_creation',
+                        'glpi_tickets.date_mod'
+                    ],
+                    'FROM'   => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE'  => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_groups_tickets.type'      => 1,
+                        'glpi_tickets.is_deleted'       => 0
+                    ],
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                ]);
+
                 $total_row_count2 = count($iterator2);
                 $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
 
@@ -463,7 +519,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
-                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
                                 $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
@@ -512,17 +568,45 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
         // _____________________________ TABLEAU 2 _____________________________ TICKET EN ATTENTE 'waiting'
                 //***************************************************REQUETE */
-                $criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
+                /*$criteria3 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status = $status_ticket_waiting
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 2
-                                    ORDER BY glpi_tickets.date_mod DESC;";
+                                    ORDER BY glpi_tickets.date_mod DESC;";*/
                 //***************************************************REQUETE */
 
                 // Variables (requete)
-                $iterator3 = $DB->request($criteria3);
+                //$iterator3 = $DB->request($criteria3);
+                $iterator3 = $DB->request([
+                    'SELECT' => [
+                        'glpi_tickets.id',
+                        'glpi_tickets.name',
+                        'glpi_tickets.content',
+                        'glpi_tickets.entities_id',
+                        'glpi_tickets.priority',
+                        'glpi_tickets.date_creation',
+                        'glpi_tickets.date_mod'
+                    ],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_tickets.status'           => $status_ticket_waiting,
+                        'glpi_tickets.is_deleted'       => 0,
+                        'glpi_groups_tickets.type'      => 2
+                    ],
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                ]);
+
                 $total_row_count3 = count($iterator3);
                 $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
 
@@ -648,7 +732,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
-                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
                                 $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
@@ -697,17 +781,51 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
         // _____________________________ TABLEAU 3 _____________________________ VOS TICKETS OBSERVES 'observed'
                 //***************************************************REQUETE */
-                $criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
+                /*$criteria4 ="SELECT glpi_tickets.id, glpi_tickets.name, glpi_tickets.content, glpi_tickets.entities_id, glpi_tickets.priority, glpi_tickets.date_creation, glpi_tickets.date_mod FROM glpi_tickets 
                             LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 WHERE glpi_groups_tickets.groups_id = $id_group 
                                     AND glpi_tickets.status IN ('$status_ticket_incoming', '$status_ticket_planned' , '$status_ticket_assigned' , '$status_ticket_waiting')
                                     AND glpi_tickets.is_deleted = 0
                                     AND glpi_groups_tickets.type = 3
-                                    ORDER BY glpi_tickets.date_mod DESC;";
+                                    ORDER BY glpi_tickets.date_mod DESC;";*/
                 //***************************************************REQUETE */
 
                 // Variables (requete)
-                $iterator4 = $DB->request($criteria4);
+                //$iterator4 = $DB->request($criteria4);
+
+                $iterator4 = $DB->request([
+                    'SELECT' => [
+                        'glpi_tickets.id',
+                        'glpi_tickets.name',
+                        'glpi_tickets.content',
+                        'glpi_tickets.entities_id',
+                        'glpi_tickets.priority',
+                        'glpi_tickets.date_creation',
+                        'glpi_tickets.date_mod'
+                    ],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_groups_tickets.type'      => 3,
+                        'glpi_tickets.is_deleted'       => 0,
+                        'glpi_tickets.status'           => ['IN', [
+                            $status_ticket_incoming,
+                            $status_ticket_planned,
+                            $status_ticket_assigned,
+                            $status_ticket_waiting
+                        ]]
+                    ],
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                ]);
+
                 $total_row_count4 = count($iterator4);
                 $displayed_row_count4 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count4);
 
@@ -833,7 +951,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
-                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
                                 $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{
@@ -882,18 +1000,47 @@ class PluginMycustomviewMyview extends CommonDBTM
             //******************************************************************* */
         // _____________________________ TABLEAU 4 _____________________________ VOS TACHES DE TICKET A TRAITER 
                 //***************************************************REQUETE
-                $criteria10 ="	SELECT *, glpi_tickettasks.content AS task_content FROM glpi_tickets 
+                /*$criteria10 ="	SELECT *, glpi_tickettasks.content AS task_content FROM glpi_tickets 
                                 LEFT JOIN glpi_groups_tickets ON glpi_groups_tickets.tickets_id = glpi_tickets.id 
                                 LEFT JOIN glpi_tickettasks ON glpi_tickettasks.tickets_id = glpi_tickets.id 
                                     WHERE glpi_groups_tickets.groups_id = 5 
                                         AND glpi_tickettasks.groups_id_tech = 5
                                         AND glpi_tickettasks.state = 1
                                         AND glpi_tickets.is_deleted = 0
-                                        ORDER BY glpi_tickets.date_mod DESC;";
+                                        ORDER BY glpi_tickets.date_mod DESC;";*/
                 //***************************************************REQUETE 
                 
                 // Variables (requete)
-                $iterator10 = $DB->request($criteria10);
+                //$iterator10 = $DB->request($criteria10);
+                $iterator10 = $DB->request([
+                    'SELECT' => [
+                        'glpi_tickets.*',
+                        'glpi_tickettasks.content AS task_content'
+                    ],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ],
+                        'glpi_tickettasks' => [
+                            'FKEY' => [
+                                'glpi_tickets'       => 'id',
+                                'glpi_tickettasks'   => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id'     => 5,
+                        'glpi_tickettasks.groups_id_tech'   => 5,
+                        'glpi_tickettasks.state'            => 1,
+                        'glpi_tickets.is_deleted'           => 0
+                    ],
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                ]);
+
                 $total_row_count10 = count($iterator10);
                 $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
 
@@ -1018,7 +1165,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $associated_elements = [];
                             $entity_id = $data['entities_id'];
 
-                            $result = $DB->query("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
+                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
                             if(!empty($result->completename)){
                                 $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
                             }else{

@@ -26,7 +26,11 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.0.5');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.0_beta1');
+// Minimal GLPI version, inclusive
+define('PLUGIN_MYCUSTOMVIEW_MIN_GLPI', '11.0.0');
+// Maximum GLPI version, exclusive
+define('PLUGIN_MYCUSTOMVIEW_MAX_GLPI', '11.0.1');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));
@@ -43,18 +47,21 @@ if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
  */
 function plugin_init_mycustomview()
 {
-   global $PLUGIN_HOOKS, $DB;
-   Plugin::registerClass('PluginMycustomviewProfile', ['addtabon' => 'Profile']);
-
-   if(Session::haveRight("plugin_mycustomview_use", READ)){
-      Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
-      Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
-
-   }
-
+   global $PLUGIN_HOOKS, $CFG_GLPI;
    $PLUGIN_HOOKS['csrf_compliant']['mycustomview'] = true;
-   // -- PAGE DE CONFIGURATION -- 
-   $PLUGIN_HOOKS['config_page']['mycustomview'] = 'front/config.form.php';
+
+   $plugin = new Plugin();
+   if ($plugin->isInstalled('mycustomview') && $plugin->isActivated('mycustomview')) {
+      Plugin::registerClass('PluginMycustomviewProfile', ['addtabon' => 'Profile']);
+
+      if(Session::haveRight("plugin_mycustomview_use", READ)){
+         Plugin::registerClass('PluginMycustomviewMyview', ['addtabon' => 'Central']);
+         Plugin::registerClass('PluginMycustomviewPreference',['addtabon' => 'Preference']);
+      }
+
+      // -- PAGE DE CONFIGURATION -- 
+      $PLUGIN_HOOKS['config_page']['mycustomview'] = 'front/config.form.php';
+   }
 }
 
 
@@ -74,43 +81,9 @@ function plugin_version_mycustomview()
       'homepage'       => 'https://github.com/LRYDark/mycustomview/releases',
       'requirements'   => [
          'glpi' => [
-            'min' => '10.0',
-         ]
+               'min' => PLUGIN_MYCUSTOMVIEW_MIN_GLPI,
+               'max' => PLUGIN_MYCUSTOMVIEW_MAX_GLPI,
+         ],
       ]
    ];
-}
-
-/**
- * Check pre-requisites before install
- * OPTIONNAL, but recommanded
- *
- * @return boolean
- */
-function plugin_mycustomview_check_prerequisites()
-{
-   $version = preg_replace('/^((\d+\.?)+).*$/', '$1', GLPI_VERSION);
-   if (version_compare($version, '10.0', '<')) {
-      echo "This plugin requires GLPI >= 10.0";
-      return false;
-   }
-   return true;
-}
-
-/**
- * Check configuration process
- *
- * @param boolean $verbose Whether to display message on failure. Defaults to false
- *
- * @return boolean
- */
-function plugin_mycustomview_check_config($verbose = false)
-{
-   if (true) { // Your configuration check
-      return true;
-   }
-
-   if ($verbose) {
-      echo __('Installed / not configured', 'mycustomview');
-   }
-   return false;
 }

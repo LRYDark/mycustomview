@@ -49,7 +49,7 @@ class PluginMycustomviewProfile extends Profile
         $query = "DELETE FROM `glpi_profiles`
                   WHERE `profiles_id`='$ID'
                   AND `name` LIKE '%plugin_mycustomview%'";
-        $DB->query($query);
+        $DB->doQuery($query);
     }
 
     /**
@@ -63,7 +63,7 @@ class PluginMycustomviewProfile extends Profile
     function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
     {
         if ($item->getType() == 'Profile') {
-            return __("Ma vue personnalisée", "mycustomview");
+            return __('<span class="d-flex align-items-center"><i class="fa-solid fa-eye me-2"></i>Ma vue personnalisée</span>', "mycustomview");
         }
         return '';
     }
