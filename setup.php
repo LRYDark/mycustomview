@@ -26,11 +26,11 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.0_beta1');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.1');
 // Minimal GLPI version, inclusive
 define('PLUGIN_MYCUSTOMVIEW_MIN_GLPI', '11.0.0');
 // Maximum GLPI version, exclusive
-define('PLUGIN_MYCUSTOMVIEW_MAX_GLPI', '11.0.1');
+define('PLUGIN_MYCUSTOMVIEW_MAX_GLPI', '11.2.0');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));
