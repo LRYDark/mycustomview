@@ -40,13 +40,14 @@ class PluginMycustomviewPreference extends CommonDBTM {
    static function checkIfPreferenceExists($users_id) {
       global $DB;
 
-      $result = $DB->doQuery("SELECT `id`
-                FROM `glpi_plugin_mycustomview_preferences`
-                WHERE `users_id` = '" . $users_id . "' ");
-      if ($DB->numrows($result) > 0)
-         return $DB->result($result, 0, "id");
-      else
-         return 0;
+      $result = $DB->request([
+         'SELECT' => ['id'],
+         'FROM'   => 'glpi_plugin_mycustomview_preferences',
+         'WHERE'  => ['users_id' => (int)$users_id],
+         'LIMIT'  => 1,
+      ]);
+      $row = $result->current();
+      return $row ? (int)$row['id'] : 0;
    }
 
    static function addDefaultPreference($users_id) {
@@ -106,8 +107,8 @@ class PluginMycustomviewPreference extends CommonDBTM {
          $groups[$data['id']] = $data['name'];
       }
 
-      $var = $DB->doQuery("SELECT * FROM glpi_plugin_mycustomview_config WHERE id = 1")->fetch_object();
-      $var = $var->max_filters;
+      $cfg = $DB->request(['SELECT' => ['max_filters'], 'FROM' => 'glpi_plugin_mycustomview_config', 'LIMIT' => 1]);
+      $var = (int)(($cfg->current() ?: [])['max_filters'] ?? 4);
       ?><script>
          var jsvar = '<?=$var?>';
          $(document).ready(function() {

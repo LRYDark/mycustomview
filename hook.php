@@ -57,7 +57,10 @@ function plugin_mycustomview_install()
          KEY `users_id` (`users_id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;";
 
-      $DB->doQuery($query) or die("error creating glpi_plugin_mycustomview_preferences " . $DB->error());
+      if (!$DB->doQuery($query)) {
+         Toolbox::logInFile('plugin_mycustomview', "ERROR: failed to create glpi_plugin_mycustomview_preferences: " . $DB->error() . PHP_EOL);
+         return false;
+      }
    }
 
    if (!$DB->TableExists("glpi_plugin_mycustomview_config")) {
@@ -67,7 +70,10 @@ function plugin_mycustomview_install()
          PRIMARY KEY  (`id`)
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-      $DB->doQuery($query) or die("error creating glpi_plugin_mycustomview_config " . $DB->error());
+      if (!$DB->doQuery($query)) {
+         Toolbox::logInFile('plugin_mycustomview', "ERROR: failed to create glpi_plugin_mycustomview_config: " . $DB->error() . PHP_EOL);
+         return false;
+      }
 
       $DB->insert(
          'glpi_plugin_mycustomview_config',

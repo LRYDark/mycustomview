@@ -26,7 +26,7 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.1');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.2');
 // Minimal GLPI version, inclusive
 define('PLUGIN_MYCUSTOMVIEW_MIN_GLPI', '11.0.0');
 // Maximum GLPI version, exclusive

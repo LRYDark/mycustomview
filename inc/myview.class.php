@@ -34,6 +34,86 @@ use Glpi\Application\View\TemplateRenderer;
 
 class PluginMycustomviewMyview extends CommonDBTM
 {
+   private static function getConfiguredGroupIdsForUser(int $userId): array
+   {
+      $group = new PluginMycustomviewPreference();
+      $rows  = $group->find(['users_id' => $userId]);
+      $groupIds = [];
+
+      foreach ($rows as $row) {
+         $raw = $row['groups_id'] ?? '';
+         if (empty($raw)) {
+            continue;
+         }
+         $decoded = json_decode($raw, true);
+         if (!is_array($decoded)) {
+            continue;
+         }
+         foreach ($decoded as $groupId) {
+            $groupId = (int)$groupId;
+            if ($groupId > 0) {
+               $groupIds[] = $groupId;
+            }
+         }
+      }
+
+      return $groupIds;
+   }
+
+   private static function getUserFullViewFlag(int $userId): int
+   {
+      global $DB;
+
+      static $cache = [];
+      if (isset($cache[$userId])) {
+         return $cache[$userId];
+      }
+
+      $row = $DB->doQuery("SELECT full_view FROM glpi_plugin_mycustomview_preferences WHERE users_id = " . (int)$userId)->fetch_object();
+      $cache[$userId] = (int)($row->full_view ?? 0);
+
+      return $cache[$userId];
+   }
+
+   private static function getGroupsByIds(array $groupIds): array
+   {
+      global $DB;
+
+      $groupIds = array_values(array_filter(array_map('intval', $groupIds)));
+      if (empty($groupIds)) {
+         return [];
+      }
+
+      $rows = [];
+      foreach ($DB->request([
+         'SELECT' => ['id', 'name', 'comment'],
+         'FROM'   => 'glpi_groups',
+         'WHERE'  => ['id' => $groupIds]
+      ]) as $row) {
+         $rows[(int)($row['id'] ?? 0)] = $row;
+      }
+
+      return $rows;
+   }
+
+   private static function getEntityBadgeHtml(int $entityId): string
+   {
+      global $DB;
+
+      static $cache = [];
+      if (isset($cache[$entityId])) {
+         return $cache[$entityId];
+      }
+
+      $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = " . (int)$entityId)->fetch_object();
+      if (!empty($result->completename)) {
+         $cache[$entityId] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> " . __($result->completename) . " </span>";
+      } else {
+         $cache[$entityId] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> " . __($result->name) . " </span>";
+      }
+
+      return $cache[$entityId];
+   }
 
    public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
    {
@@ -43,28 +123,24 @@ class PluginMycustomviewMyview extends CommonDBTM
          return false;
       }
       if ($item->getType() == 'Central') {
-
-        $group   = new PluginMycustomviewPreference();
-        $result  = $group->find(['users_id' => Session::getLoginUserID()]);
+        $userId = (int)Session::getLoginUserID();
+        $groupIds = self::getConfiguredGroupIdsForUser($userId);
+        $groups = self::getGroupsByIds($groupIds);
+        $fullViewEnabled = self::getUserFullViewFlag($userId) === 1;
         $tabs = [];
-  
-        $i = 0;
-        foreach ($result as $data) {
-            $groups_id = $data['groups_id'];
-            if(!empty($groups_id)){
-                $group_id = json_decode($groups_id);
-                foreach ($group_id as $data) {
-                    $result = $DB->doQuery("SELECT * FROM glpi_groups WHERE id = $data")->fetch_object();
 
-                    $user_id = session::getLoginUserID();
-                    $full_view = $DB->doQuery("SELECT full_view FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
-                    if(!empty($result->comment) && $full_view->full_view == 1){
-                            array_push($tabs, __($result->comment, "mycustomview"));
-                        }elseif(!empty($result->name)){
-                            array_push($tabs, __($result->name, "mycustomview"));
-                        }
-                    $i++;
-                }
+        foreach ($groupIds as $groupId) {
+            $groupRow = $groups[(int)$groupId] ?? null;
+            if (!is_array($groupRow)) {
+               continue;
+            }
+
+            $comment = (string)($groupRow['comment'] ?? '');
+            $name = (string)($groupRow['name'] ?? '');
+            if ($fullViewEnabled && $comment !== '') {
+               $tabs[] = __($comment, "mycustomview");
+            } elseif ($name !== '') {
+               $tabs[] = __($name, "mycustomview");
             }
         }
         return $tabs;
@@ -77,20 +153,15 @@ class PluginMycustomviewMyview extends CommonDBTM
       global $PLUGIN_HOOKS, $DB;
 
       if ($item->getType() == 'Central') {
-        $group   = new PluginMycustomviewPreference();
-        $result  = $group->find(['users_id' => Session::getLoginUserID()]);
+        $groupIds = self::getConfiguredGroupIdsForUser((int)Session::getLoginUserID());
         $i = 0;
-        foreach ($result as $data) {
-            $groups_id = $data['groups_id'];
-            $group_id = json_decode($groups_id);
-            foreach ($group_id as $data) {
-                switch ($tabnum) {
-                    case $i:
-                        self::showMyViewGroup($data);
-                        break;
-                }
-                $i++;
+        foreach ($groupIds as $groupId) {
+            switch ($tabnum) {
+                case $i:
+                    self::showMyViewGroup((int)$groupId);
+                    break;
             }
+            $i++;
         }
      }
      return true;
@@ -104,8 +175,13 @@ class PluginMycustomviewMyview extends CommonDBTM
     public static function showMyViewGroup($id_group){
         global $PLUGIN_HOOKS, $DB, $CFG_GLPI;
 
-        $user_id = session::getLoginUserID();
-        $pref = $DB->doQuery("SELECT * FROM glpi_plugin_mycustomview_preferences WHERE users_id = $user_id")->fetch_object();
+        $user_id = (int)Session::getLoginUserID();
+        $pref_iter = $DB->request([
+            'FROM'  => 'glpi_plugin_mycustomview_preferences',
+            'WHERE' => ['users_id' => $user_id],
+            'LIMIT' => 1,
+        ]);
+        $pref = (object)($pref_iter->current() ?: []);
 
         $rand = rand();
         $tableau_nbr = 0;
@@ -123,7 +199,17 @@ class PluginMycustomviewMyview extends CommonDBTM
             var card_impair = [];
         </script><?php
 
-        $glpi_config = $DB->doQuery("SELECT display_count_on_home FROM glpi_users WHERE id = $user_id")->fetch_object();
+        $cfg_iter = $DB->request([
+            'SELECT' => ['display_count_on_home'],
+            'FROM'   => 'glpi_users',
+            'WHERE'  => ['id' => $user_id],
+            'LIMIT'  => 1,
+        ]);
+        $glpi_config = (object)($cfg_iter->current() ?: []);
+        if (empty($glpi_config->display_count_on_home)) {
+            $glpi_config->display_count_on_home = 5;
+        }
+        $homeDisplayLimit = max(1, (int)$glpi_config->display_count_on_home);
         
         echo '<div class="masonry_grid row row-cards mb-5" style="position: relative; height: 0px;" id="tableau_'.$rand.'">';
         
@@ -140,6 +226,25 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                 // Variables (requete)
                 //$iterator = $DB->request($criteria);
+
+                $total_row_count = (int)(($DB->request([
+                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'FROM'   => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE'  => [
+                        'glpi_groups_tickets.groups_id'      => $id_group,
+                        'glpi_groups_tickets.type'           => 2,
+                        'glpi_tickets.is_deleted'            => 0,
+                        'glpi_tickets.status'                => ['IN', [$status_ticket_incoming, $status_ticket_planned, $status_ticket_assigned]]
+                    ],
+                ])->current()['cpt'] ?? 0));
 
                 $iterator = $DB->request([
                     'SELECT' => [
@@ -166,11 +271,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'glpi_tickets.is_deleted'            => 0,
                         'glpi_tickets.status'                => ['IN', [$status_ticket_incoming, $status_ticket_planned, $status_ticket_assigned]]
                     ],
-                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC'],
+                    'LIMIT' => $homeDisplayLimit
                 ]);
 
-                $total_row_count = count($iterator);
-                $displayed_row_count = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count);
+                $displayed_row_count = min($homeDisplayLimit, $total_row_count);
 
                 if ($displayed_row_count > 0 && $pref->Tickets_to_be_processed != 0) {
                    
@@ -276,9 +381,6 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator as $data) {
 
-                        if($glpi_config->display_count_on_home == NULL){
-                            $glpi_config->display_count_on_home = 5;
-                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -307,17 +409,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             //************************************************************DATE MODIFICATION 
 
                             //************************************************************elements associés 
-                            $associated_elements = [];
-                            $entity_id = $data['entities_id'];
-
-                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-                            if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
-                            }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
-                            }
-
-                            $row['values'][] = implode('<br>', $associated_elements);
+                            $row['values'][] = self::getEntityBadgeHtml((int)$data['entities_id']);
                             //************************************************************elements associés 
 
                             //************************************************************descritpion 
@@ -369,6 +461,24 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                 // Variables (requete)
                 //$iterator2 = $DB->request($criteria2);
+                $total_row_count2 = (int)(($DB->request([
+                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'FROM'   => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE'  => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_groups_tickets.type'      => 1,
+                        'glpi_tickets.is_deleted'       => 0
+                    ],
+                ])->current()['cpt'] ?? 0));
+
                 $iterator2 = $DB->request([
                     'SELECT' => [
                         'glpi_tickets.id',
@@ -393,11 +503,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'glpi_groups_tickets.type'      => 1,
                         'glpi_tickets.is_deleted'       => 0
                     ],
-                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC'],
+                    'LIMIT' => $homeDisplayLimit
                 ]);
 
-                $total_row_count2 = count($iterator2);
-                $displayed_row_count2 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count2);
+                $displayed_row_count2 = min($homeDisplayLimit, $total_row_count2);
 
                 if ($displayed_row_count2 > 0 && $pref->Current_tickets != 0) {
                     
@@ -485,9 +595,6 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator2 as $data) {
 
-                        if($glpi_config->display_count_on_home == null){
-                            $glpi_config->display_count_on_home = 5;
-                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -516,17 +623,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
-                            $associated_elements = [];
-                            $entity_id = $data['entities_id'];
-
-                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-                            if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
-                            }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
-                            }
-
-                            $row['values'][] = implode('<br>', $associated_elements);
+                            $row['values'][] = self::getEntityBadgeHtml((int)$data['entities_id']);
                             /************************************************************elements associés */
 
                             /************************************************************descritpion */
@@ -579,6 +676,25 @@ class PluginMycustomviewMyview extends CommonDBTM
 
                 // Variables (requete)
                 //$iterator3 = $DB->request($criteria3);
+                $total_row_count3 = (int)(($DB->request([
+                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_tickets.status'           => $status_ticket_waiting,
+                        'glpi_tickets.is_deleted'       => 0,
+                        'glpi_groups_tickets.type'      => 2
+                    ],
+                ])->current()['cpt'] ?? 0));
+
                 $iterator3 = $DB->request([
                     'SELECT' => [
                         'glpi_tickets.id',
@@ -604,11 +720,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'glpi_tickets.is_deleted'       => 0,
                         'glpi_groups_tickets.type'      => 2
                     ],
-                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC'],
+                    'LIMIT' => $homeDisplayLimit
                 ]);
 
-                $total_row_count3 = count($iterator3);
-                $displayed_row_count3 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count3);
+                $displayed_row_count3 = min($homeDisplayLimit, $total_row_count3);
 
                 if ($displayed_row_count3 > 0 && $pref->Pending_tickets != 0) {
                                     
@@ -698,9 +814,6 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator3 as $data) {
 
-                        if($glpi_config->display_count_on_home == null){
-                            $glpi_config->display_count_on_home = 5;
-                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -729,17 +842,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
-                            $associated_elements = [];
-                            $entity_id = $data['entities_id'];
-
-                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-                            if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
-                            }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
-                            }
-
-                            $row['values'][] = implode('<br>', $associated_elements);
+                            $row['values'][] = self::getEntityBadgeHtml((int)$data['entities_id']);
                             /************************************************************elements associés */
 
                             /************************************************************descritpion */
@@ -793,6 +896,30 @@ class PluginMycustomviewMyview extends CommonDBTM
                 // Variables (requete)
                 //$iterator4 = $DB->request($criteria4);
 
+                $total_row_count4 = (int)(($DB->request([
+                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id' => $id_group,
+                        'glpi_groups_tickets.type'      => 3,
+                        'glpi_tickets.is_deleted'       => 0,
+                        'glpi_tickets.status'           => ['IN', [
+                            $status_ticket_incoming,
+                            $status_ticket_planned,
+                            $status_ticket_assigned,
+                            $status_ticket_waiting
+                        ]]
+                    ],
+                ])->current()['cpt'] ?? 0));
+
                 $iterator4 = $DB->request([
                     'SELECT' => [
                         'glpi_tickets.id',
@@ -823,11 +950,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                             $status_ticket_waiting
                         ]]
                     ],
-                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC'],
+                    'LIMIT' => $homeDisplayLimit
                 ]);
 
-                $total_row_count4 = count($iterator4);
-                $displayed_row_count4 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count4);
+                $displayed_row_count4 = min($homeDisplayLimit, $total_row_count4);
 
                 if ($displayed_row_count4 > 0 && $pref->Observed_tickets != 0) {
     
@@ -917,9 +1044,6 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator4 as $data) {
 
-                        if($glpi_config->display_count_on_home == null){
-                            $glpi_config->display_count_on_home = 5;
-                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -948,17 +1072,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             //************************************************************DATE MODIFICATION 
 
                             /************************************************************elements associés */
-                            $associated_elements = [];
-                            $entity_id = $data['entities_id'];
-
-                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-                            if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
-                            }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
-                            }
-
-                            $row['values'][] = implode('<br>', $associated_elements);
+                            $row['values'][] = self::getEntityBadgeHtml((int)$data['entities_id']);
                             /************************************************************elements associés */
 
                             /************************************************************descritpion */
@@ -1012,9 +1126,37 @@ class PluginMycustomviewMyview extends CommonDBTM
                 
                 // Variables (requete)
                 //$iterator10 = $DB->request($criteria10);
+                $total_row_count10 = (int)(($DB->request([
+                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'FROM' => 'glpi_tickets',
+                    'LEFT JOIN' => [
+                        'glpi_groups_tickets' => [
+                            'FKEY' => [
+                                'glpi_tickets'        => 'id',
+                                'glpi_groups_tickets' => 'tickets_id'
+                            ]
+                        ],
+                        'glpi_tickettasks' => [
+                            'FKEY' => [
+                                'glpi_tickets'       => 'id',
+                                'glpi_tickettasks'   => 'tickets_id'
+                            ]
+                        ]
+                    ],
+                    'WHERE' => [
+                        'glpi_groups_tickets.groups_id'     => 5,
+                        'glpi_tickettasks.groups_id_tech'   => 5,
+                        'glpi_tickettasks.state'            => 1,
+                        'glpi_tickets.is_deleted'           => 0
+                    ],
+                ])->current()['cpt'] ?? 0));
+
                 $iterator10 = $DB->request([
                     'SELECT' => [
-                        'glpi_tickets.*',
+                        'glpi_tickets.entities_id',
+                        'glpi_tickets.priority',
+                        'glpi_tickets.name',
+                        'glpi_tickettasks.tickets_id',
                         'glpi_tickettasks.content AS task_content'
                     ],
                     'FROM' => 'glpi_tickets',
@@ -1038,11 +1180,11 @@ class PluginMycustomviewMyview extends CommonDBTM
                         'glpi_tickettasks.state'            => 1,
                         'glpi_tickets.is_deleted'           => 0
                     ],
-                    'ORDERBY' => ['glpi_tickets.date_mod DESC']
+                    'ORDERBY' => ['glpi_tickets.date_mod DESC'],
+                    'LIMIT' => $homeDisplayLimit
                 ]);
 
-                $total_row_count10 = count($iterator10);
-                $displayed_row_count10 = min((int)$_SESSION['glpidisplay_count_on_home'], $total_row_count10);
+                $displayed_row_count10 = min($homeDisplayLimit, $total_row_count10);
 
                 if ($displayed_row_count10 > 0 && $pref->Ticket_tasks_to_be_addressed != 0) {
 
@@ -1143,9 +1285,6 @@ class PluginMycustomviewMyview extends CommonDBTM
                     $i = 0;
                     foreach ($iterator10 as $data) {
 
-                        if($glpi_config->display_count_on_home == null){
-                            $glpi_config->display_count_on_home = 5;
-                        }
                         if ($i == $glpi_config->display_count_on_home) {
                             break;
                         }
@@ -1162,17 +1301,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                             //************************************************************ID 
 
                             //************************************************************elements associés 
-                            $associated_elements = [];
-                            $entity_id = $data['entities_id'];
-
-                            $result = $DB->doQuery("SELECT name, completename FROM glpi_entities WHERE id = $entity_id")->fetch_object();
-                            if(!empty($result->completename)){
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->completename)." </span>";
-                            }else{
-                                $associated_elements[] = "<span class='glpi-badge form-field row col-12 d-flex align-items-center'style='padding: 2px'> ".__($result->name)." </span>";
-                            }
-
-                            $row['values'][] = implode('<br>', $associated_elements);
+                            $row['values'][] = self::getEntityBadgeHtml((int)$data['entities_id']);
                             //************************************************************elements associés
 
                             //************************************************************descritpion
