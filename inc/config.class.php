@@ -117,13 +117,6 @@ class PluginMycustomviewConfig extends CommonDBTM
         }
 
         if(isset($_POST['max_filters'])) {
-            if (
-                empty($_POST['_glpi_csrf_token'])
-                || !defined('GLPI_VERSION')
-                || version_compare((string) GLPI_VERSION, '11.0.0', '<')
-            ) {
-                Session::checkCSRF($_POST, true);
-            }
             $posted_max_filters = (int)$_POST['max_filters'];
             $posted_max_filters = max(1, min(30, $posted_max_filters));
             $change_max_filters = self::setConfiguration($posted_max_filters, $id_max_filters);
@@ -160,7 +153,6 @@ class PluginMycustomviewConfig extends CommonDBTM
         echo "<td style='width: 30%'><label for ='max_filters'>" .__("Nombres de filtres", "mycustomview") . " : </label></td>";
         echo "<td style='width: 70%'><input type ='number' min='1' max='30' id='max_filters' value= '".(int)$max_filters."' name='max_filters' placeholder='Min : 1 / Max : 30' required</td>";
         echo "</table>\n";
-        echo Html::hidden('_glpi_csrf_token', ['value' => Session::getNewCSRFToken(true)]);
         if(Session::haveRight("profile", CREATE)){
             echo "<input type='submit' style='margin-top : 10px' name='$createUpdate' class='submit' ".
         "value='$createUpdate'>";

@@ -228,7 +228,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 //$iterator = $DB->request($criteria);
 
                 $total_row_count = (int)(($DB->request([
-                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'SELECT' => [new \Glpi\DBAL\QueryExpression('COUNT(*) AS cpt')],
                     'FROM'   => 'glpi_tickets',
                     'LEFT JOIN' => [
                         'glpi_groups_tickets' => [
@@ -462,7 +462,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 // Variables (requete)
                 //$iterator2 = $DB->request($criteria2);
                 $total_row_count2 = (int)(($DB->request([
-                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'SELECT' => [new \Glpi\DBAL\QueryExpression('COUNT(*) AS cpt')],
                     'FROM'   => 'glpi_tickets',
                     'LEFT JOIN' => [
                         'glpi_groups_tickets' => [
@@ -677,7 +677,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 // Variables (requete)
                 //$iterator3 = $DB->request($criteria3);
                 $total_row_count3 = (int)(($DB->request([
-                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'SELECT' => [new \Glpi\DBAL\QueryExpression('COUNT(*) AS cpt')],
                     'FROM' => 'glpi_tickets',
                     'LEFT JOIN' => [
                         'glpi_groups_tickets' => [
@@ -897,7 +897,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 //$iterator4 = $DB->request($criteria4);
 
                 $total_row_count4 = (int)(($DB->request([
-                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'SELECT' => [new \Glpi\DBAL\QueryExpression('COUNT(*) AS cpt')],
                     'FROM' => 'glpi_tickets',
                     'LEFT JOIN' => [
                         'glpi_groups_tickets' => [
@@ -1127,7 +1127,7 @@ class PluginMycustomviewMyview extends CommonDBTM
                 // Variables (requete)
                 //$iterator10 = $DB->request($criteria10);
                 $total_row_count10 = (int)(($DB->request([
-                    'SELECT' => [new QueryExpression('COUNT(*) AS cpt')],
+                    'SELECT' => [new \Glpi\DBAL\QueryExpression('COUNT(*) AS cpt')],
                     'FROM' => 'glpi_tickets',
                     'LEFT JOIN' => [
                         'glpi_groups_tickets' => [

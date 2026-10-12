@@ -27,7 +27,6 @@
  --------------------------------------------------------------------------
  */
 
-include('../../../inc/includes.php');
 
 //Save user preferences
    $pref = new PluginMycustomviewPreference();

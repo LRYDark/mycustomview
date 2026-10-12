@@ -32,7 +32,7 @@ if (!defined('GLPI_ROOT')) {
 
 class PluginMycustomviewProfile extends Profile
 {
-    static $rightname = "profile";
+    static string $rightname = "profile";
 
     static function getAllRights() {
         $rights = [

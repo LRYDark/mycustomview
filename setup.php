@@ -26,17 +26,17 @@
  --------------------------------------------------------------------------
  */
 
-define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.1.2');
+define('PLUGIN_MYCUSTOMVIEW_VERSION', '1.2.0');
 // Minimal GLPI version, inclusive
-define('PLUGIN_MYCUSTOMVIEW_MIN_GLPI', '11.0.0');
+define('PLUGIN_MYCUSTOMVIEW_MIN_GLPI', '12.0.0');
 // Maximum GLPI version, exclusive
-define('PLUGIN_MYCUSTOMVIEW_MAX_GLPI', '11.2.0');
+define('PLUGIN_MYCUSTOMVIEW_MAX_GLPI', '12.0.99');
 
 if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
    define("PLUGIN_MYCUSTOMVIEW_DIR", Plugin::getPhpDir("mycustomview"));
    define("PLUGIN_MYCUSTOMVIEW_NOTFULL_DIR", Plugin::getPhpDir("mycustomview",false));
-   define("PLUGIN_MYCUSTOMVIEW_WEBDIR", Plugin::getWebDir("mycustomview"));
-   define("PLUGIN_MYCUSTOMVIEW_NOTFULL_WEBDIR", Plugin::getWebDir("mycustomview",false));
+   define("PLUGIN_MYCUSTOMVIEW_WEBDIR", ($GLOBALS['CFG_GLPI']['root_doc'] ?? '') . '/plugins/mycustomview');
+   define("PLUGIN_MYCUSTOMVIEW_NOTFULL_WEBDIR", 'plugins/mycustomview');
 }
 
 /**
@@ -48,7 +48,6 @@ if (!defined("PLUGIN_MYCUSTOMVIEW_DIR")) {
 function plugin_init_mycustomview()
 {
    global $PLUGIN_HOOKS, $CFG_GLPI;
-   $PLUGIN_HOOKS['csrf_compliant']['mycustomview'] = true;
 
    $plugin = new Plugin();
    if ($plugin->isInstalled('mycustomview') && $plugin->isActivated('mycustomview')) {
